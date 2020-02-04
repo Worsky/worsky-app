@@ -1,3 +1,15 @@
 {
-  "java.configuration.updateBuildConfiguration": "interactive"
+    "java.configuration.updateBuildConfiguration": "interactive",
+    "files.exclude": {
+        "android/**": true,
+        "ios/**": true
+    },
+    "files.watcherExclude": {
+        "android/**": true,
+        "ios/**": true
+    },
+    "search.exclude": {
+        "android/**": true,
+        "ios/**": true
+    }
 }
