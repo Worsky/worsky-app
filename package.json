@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "start": "node node_modules/react-native/local-cli/cli.js start",
+    "postinstall": "jetify",
     "test": "jest",
     "react-devtool": "react-devtools"
   },
@@ -11,6 +12,7 @@
     "@appandflow/masonry-list": "^0.4.0",
     "@react-native-community/geolocation": "^1.4.2",
     "@react-native-mapbox-gl/maps": "^7.0.9",
+    "jetifier": "^1.6.2",
     "axios": "^0.19.0",
     "buffer": "^5.2.1",
     "currency-formatter": "^1.5.4",
