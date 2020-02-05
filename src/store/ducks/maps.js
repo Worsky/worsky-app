@@ -51,14 +51,22 @@ export default function maps(state = INITIAL_STATE, action) {
 }
 
 export const Creators = {
-  loadPosts: (latitude1, longitude1, latitude2, longitude2, zoom) => ({
+  loadPosts: (
+    latitude1,
+    longitude1,
+    latitude2,
+    longitude2,
+    zoom,
+    point_type_id
+  ) => ({
     type: Types.LOAD_POST,
     payload: {
       latitude1,
       longitude1,
       latitude2,
       longitude2,
-      zoom
+      zoom,
+      point_type_id
     }
   }),
 
@@ -70,7 +78,15 @@ export const Creators = {
     }
   }),
 
-  handlePosts: (posts, latitude1, longitude1, latitude2, longitude2, zoom) => ({
+  handlePosts: (
+    posts,
+    latitude1,
+    longitude1,
+    latitude2,
+    longitude2,
+    zoom,
+    point_type_id
+  ) => ({
     type: Types.HANDLE_POST,
     payload: {
       posts,
@@ -78,7 +94,8 @@ export const Creators = {
       longitude1,
       latitude2,
       longitude2,
-      zoom
+      zoom,
+      point_type_id
     }
   }),
 

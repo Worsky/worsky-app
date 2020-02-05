@@ -69,6 +69,7 @@
 		ED2971652150620600B7C4FE /* JavaScriptCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = ED2971642150620600B7C4FE /* JavaScriptCore.framework */; };
 		EEBC4F82DCAC48E5BDF159C8 /* Fontisto.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 7844F67DD7DE4CD1BA49DB24 /* Fontisto.ttf */; };
 		F0A253E78666DC70FD4546CD /* libPods-worskyTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 7712F2110BF8F1CD109C688B /* libPods-worskyTests.a */; };
+		FAF8357A23E93C87008FDF2F /* libCompassHeading.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FAF8354823E93C78008FDF2F /* libCompassHeading.a */; };
 		FFDAFE9A497B4A8DBCFB72A7 /* libReactNativeTestFairy.a in Frameworks */ = {isa = PBXBuildFile; fileRef = DBE0A56BF05542129A8EAE9A /* libReactNativeTestFairy.a */; };
 /* End PBXBuildFile section */
 
@@ -437,6 +438,13 @@
 			remoteGlobalIDString = 42959838203B471F00E34882;
 			remoteInfo = ReactNativeTestFairy;
 		};
+		FAF8354723E93C78008FDF2F /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = FAF8354323E93C78008FDF2F /* CompassHeading.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 134814201AA4EA6300B7C361;
+			remoteInfo = CompassHeading;
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
@@ -515,6 +523,7 @@
 		F1F72CAD0A5B6ED9D86FECCB /* Pods-worsky-tvOSTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-worsky-tvOSTests.release.xcconfig"; path = "Pods/Target Support Files/Pods-worsky-tvOSTests/Pods-worsky-tvOSTests.release.xcconfig"; sourceTree = "<group>"; };
 		F5088144DC2D41219487DDEB /* AntDesign.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = AntDesign.ttf; path = "../node_modules/react-native-vector-icons/Fonts/AntDesign.ttf"; sourceTree = "<group>"; };
 		F65A5A512386CE6400DA030C /* worsky.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; name = worsky.entitlements; path = worsky/worsky.entitlements; sourceTree = "<group>"; };
+		FAF8354323E93C78008FDF2F /* CompassHeading.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = CompassHeading.xcodeproj; path = "../node_modules/react-native-compass-heading/ios/CompassHeading.xcodeproj"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -531,6 +540,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FAF8357A23E93C87008FDF2F /* libCompassHeading.a in Frameworks */,
 				ED297163215061F000B7C4FE /* JavaScriptCore.framework in Frameworks */,
 				ADBDB9381DFEBF1600ED6528 /* libRCTBlob.a in Frameworks */,
 				11D1A2F320CAFA9E000508D9 /* libRCTAnimation.a in Frameworks */,
@@ -738,6 +748,7 @@
 		832341AE1AAA6A7D00B99B32 /* Libraries */ = {
 			isa = PBXGroup;
 			children = (
+				FAF8354323E93C78008FDF2F /* CompassHeading.xcodeproj */,
 				5E91572D1DD0AC6500FF2AA8 /* RCTAnimation.xcodeproj */,
 				146833FF1AC3E56700842450 /* React.xcodeproj */,
 				00C302A71ABCB8CE00DB3ED1 /* RCTActionSheet.xcodeproj */,
@@ -940,6 +951,14 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		FAF8354423E93C78008FDF2F /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				FAF8354823E93C78008FDF2F /* libCompassHeading.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -1071,6 +1090,10 @@
 				{
 					ProductGroup = F60120B322F48B2100035661 /* Products */;
 					ProjectRef = EF78973FD7524C0EA3DC01EA /* AirMaps.xcodeproj */;
+				},
+				{
+					ProductGroup = FAF8354423E93C78008FDF2F /* Products */;
+					ProjectRef = FAF8354323E93C78008FDF2F /* CompassHeading.xcodeproj */;
 				},
 				{
 					ProductGroup = 00C302A81ABCB8CE00DB3ED1 /* Products */;
@@ -1514,6 +1537,13 @@
 			remoteRef = F6D524E722E9FD4C0001A95F /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
+		FAF8354823E93C78008FDF2F /* libCompassHeading.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libCompassHeading.a;
+			remoteRef = FAF8354723E93C78008FDF2F /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
 /* End PBXReferenceProxy section */
 
 /* Begin PBXResourcesBuildPhase section */
@@ -1809,7 +1839,7 @@
 				CODE_SIGN_ENTITLEMENTS = worsky/worsky.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 19;
+				CURRENT_PROJECT_VERSION = 21;
 				DEAD_CODE_STRIPPING = NO;
 				DEVELOPMENT_TEAM = T6QK5ZLDQ9;
 				GCC_PREPROCESSOR_DEFINITIONS = (
@@ -1857,7 +1887,7 @@
 				CODE_SIGN_ENTITLEMENTS = worsky/worsky.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 19;
+				CURRENT_PROJECT_VERSION = 21;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = T6QK5ZLDQ9;
 				GCC_PREPROCESSOR_DEFINITIONS = (

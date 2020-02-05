@@ -16,6 +16,7 @@ const CustomModal = ({
   changeVisibility,
   content,
   minHeight = 230,
+  maxHeight = 5000,
   close = true
 }) => {
   if (Platform.OS == "ios")
@@ -31,7 +32,7 @@ const CustomModal = ({
           behavior="padding"
           enabled
         >
-          <View style={[styles.modalContainer, { minHeight }]}>
+          <View style={[styles.modalContainer, { minHeight, maxHeight }]}>
             {content}
             {close ? (
               <View style={styles.closeContainer}>
@@ -79,7 +80,8 @@ CustomModal.propTypes = {
   changeVisibility: PropTypes.func.isRequired,
   content: PropTypes.any.isRequired,
   close: PropTypes.bool,
-  minHeight: PropTypes.number
+  minHeight: PropTypes.number,
+  maxHeight: PropTypes.number
 };
 
 export default CustomModal;

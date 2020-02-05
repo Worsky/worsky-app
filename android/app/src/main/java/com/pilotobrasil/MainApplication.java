@@ -2,6 +2,7 @@ package com.pilotobrasil;
 
 import android.app.Application;
 
+import com.reactlibrary.RNCompassHeadingPackage;
 import com.facebook.react.ReactApplication;
 import com.sensors.RNSensorsPackage;
 import com.mapbox.rctmgl.RCTMGLPackage;
@@ -45,7 +46,7 @@ public class MainApplication extends Application implements ReactApplication {
             new ImagePickerPackage(),
             new ReanimatedPackage(),
             new TestFairyPackage(),
-            new VectorIconsPackage(), new RNGestureHandlerPackage());
+            new VectorIconsPackage(), new RNGestureHandlerPackage(), RNCompassHeadingPackage());
         }
 
         @Override
