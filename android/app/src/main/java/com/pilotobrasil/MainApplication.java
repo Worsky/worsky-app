@@ -2,14 +2,14 @@ package com.pilotobrasil;
 
 import android.app.Application;
 
-import com.reactlibrary.RNCompassHeadingPackage;
 import com.facebook.react.ReactApplication;
+import com.reactlibrary.CompassHeadingPackage;
+import com.geektime.rnonesignalandroid.ReactNativeOneSignalPackage;
+import com.reactnativecommunity.geolocation.GeolocationPackage;
 import com.reactnativecommunity.webview.RNCWebViewPackage;
 import com.agontuk.RNFusedLocation.RNFusedLocationPackage;
 import com.sensors.RNSensorsPackage;
 import com.mapbox.rctmgl.RCTMGLPackage;
-import com.reactnativecommunity.geolocation.GeolocationPackage;
-import com.geektime.rnonesignalandroid.ReactNativeOneSignalPackage;
 import io.invertase.firebase.RNFirebasePackage;
 import com.brentvatne.react.ReactVideoPackage;
 
@@ -37,23 +37,11 @@ public class MainApplication extends Application implements ReactApplication {
 
     @Override
     protected List<ReactPackage> getPackages() {
-      return Arrays.<ReactPackage>asList(
-        new MainReactPackage(),
-        new RNCWebViewPackage(),
-        new RNFusedLocationPackage(),
-        new RNSensorsPackage(),
-        new RCTMGLPackage(),
-        new GeolocationPackage(),
-        new ReactNativeOneSignalPackage(),
-        new RNFirebasePackage(),
-        new ReactVideoPackage(),
-        new ImagePickerPackage(),
-        new ReanimatedPackage(),
-        new TestFairyPackage(),
-        new VectorIconsPackage(),
-        new RNGestureHandlerPackage(),
-        new RNCompassHeadingPackage()
-      );
+      return Arrays.<ReactPackage>asList(new MainReactPackage(), new CompassHeadingPackage(),
+          new ReactNativeOneSignalPackage(), new GeolocationPackage(), new RNCWebViewPackage(),
+          new RNFusedLocationPackage(), new RNSensorsPackage(), new RCTMGLPackage(), new RNFirebasePackage(),
+          new ReactVideoPackage(), new ImagePickerPackage(), new ReanimatedPackage(), new TestFairyPackage(),
+          new VectorIconsPackage(), new RNGestureHandlerPackage());
     }
 
     @Override

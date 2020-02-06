@@ -58,6 +58,10 @@ target 'worSky' do
 
     pod 'react-native-webview', :path => '../node_modules/react-native-webview'
 
+    pod 'react-native-onesignal', :path => '../node_modules/react-native-onesignal'
+
+    pod 'react-native-compass-heading', :path => '../node_modules/react-native-compass-heading'
+
   end
 
   target 'worskyTests' do
