@@ -3,6 +3,7 @@ package com.pilotobrasil;
 import android.app.Application;
 
 import com.facebook.react.ReactApplication;
+import com.swmansion.rnscreens.RNScreensPackage;
 import com.reactlibrary.CompassHeadingPackage;
 import com.geektime.rnonesignalandroid.ReactNativeOneSignalPackage;
 import com.reactnativecommunity.geolocation.GeolocationPackage;
@@ -37,7 +38,8 @@ public class MainApplication extends Application implements ReactApplication {
 
     @Override
     protected List<ReactPackage> getPackages() {
-      return Arrays.<ReactPackage>asList(new MainReactPackage(), new CompassHeadingPackage(),
+      return Arrays.<ReactPackage>asList(new MainReactPackage(),
+            new RNScreensPackage(), new CompassHeadingPackage(),
           new ReactNativeOneSignalPackage(), new GeolocationPackage(), new RNCWebViewPackage(),
           new RNFusedLocationPackage(), new RNSensorsPackage(), new RCTMGLPackage(), new RNFirebasePackage(),
           new ReactVideoPackage(), new ImagePickerPackage(), new ReanimatedPackage(), new TestFairyPackage(),
