@@ -72,7 +72,7 @@ PODS:
   - nanopb/encode (0.3.901)
   - React (0.59.10):
     - React/Core (= 0.59.10)
-  - react-native-geolocation (2.0.2):
+  - react-native-geolocation (1.4.2):
     - React
   - react-native-mapbox-gl (7.0.9):
     - React
@@ -208,11 +208,11 @@ SPEC CHECKSUMS:
   GoogleUtilities: 547a86735c6f0ee30ad17e94df4fc21f616b71cb
   nanopb: 2901f78ea1b7b4015c860c2fdd1ea2fee1a18d48
   React: 36d0768f9e93be2473b37e7fa64f92c1d5341eef
-  react-native-geolocation: c956aeb136625c23e0dce0467664af2c437888c9
+  react-native-geolocation: a7b94614afbd5fd8350e0233a2025c8228fc8041
   react-native-mapbox-gl: 7d6dda14fda15b680f70ade65e47b2d39cb976d1
   RNSensors: 60197256ecd4e1e906dcaf6d634793f876eaa63b
   yoga: 684513b14b03201579ba3cee20218c9d1298b0cc
 
-PODFILE CHECKSUM: d4d071d07c452f5cd4f6855e7a7f0ca193571c06
+PODFILE CHECKSUM: 4a64b582acce5cf1ce40deb81bdc1f64d335a1a5
 
 COCOAPODS: 1.8.4

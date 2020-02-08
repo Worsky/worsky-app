@@ -171,6 +171,19 @@ const styles = StyleSheet.create({
   moreDetailButtonText: {
     color: colors.worSky.white,
     textAlign: "center"
+  },
+
+  annotationContainer: {
+    width: 30,
+    height: 30,
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: 15
+  },
+
+  annotationFill: {
+    width: 30,
+    height: 30
   }
 });
 

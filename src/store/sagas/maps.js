@@ -16,6 +16,7 @@ export function* loadPosts(action) {
     params.append("lat2", action.payload.latitude2);
     params.append("lng2", action.payload.longitude2);
     params.append("zoom", Math.round(action.payload.zoom));
+    params.append("point_type_id", action.payload.point_type_id);
 
     const callUrl = `/map/nearby?${params.toString()}`;
     const response = yield call(apiURLToken(token).get, callUrl, {});
@@ -24,16 +25,16 @@ export function* loadPosts(action) {
 
     return yield put(
       MapsActions.handlePosts(
-        response.data.data,
+        response.data.data.splice(0, 20),
         action.payload.latitude1,
         action.payload.longitude1,
         action.payload.latitude2,
         action.payload.longitude2,
-        action.payload.zoom
+        action.payload.zoom,
+        action.payload.point_type_id
       )
     );
   } catch (error) {
-    console.log({ error });
     if (error.response.status === 401)
       return yield put(refreshTokenAction.refreshToken());
 
@@ -48,8 +49,6 @@ export function* onRegionChangeComplete(action) {
     const params = new URLSearchParams();
     params.append("lat", action.payload.latitude);
     params.append("lng", action.payload.longitude);
-
-    console.log({ a: "bbbb", params });
 
     const response = yield call(apiURLToken(token).get, "/map/nearby", {
       params
