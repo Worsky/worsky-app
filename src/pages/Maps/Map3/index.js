@@ -66,9 +66,9 @@ const Maps3 = props => {
       });
   };
 
-  const openInfoModal = async point => {
-    await setInfoPoint(point);
-    await setInfoModalVisible(true);
+  const openInfoModal = point => {
+    setInfoPoint(point);
+    setInfoModalVisible(true);
     mapCenterOnPoint(point);
   };
 
@@ -101,78 +101,62 @@ const Maps3 = props => {
     setPosts(apiResponse.data.data);
   };
 
-  const renderAnnotation = point => {
-    return (
-      <MapboxGL.PointAnnotation
-        key={point.entity_id + Date()}
-        id={"post-" + point.entity_id}
-        coordinate={[Number(point.longitude), Number(point.latitude)]}
-        title={point.title}
-        snippet={
-          point.description.substring(0, 35) + "... [Veja mais detalhes]"
-        }
-        onSelected={() => {
-          openInfoModal(point);
-        }}
-      >
-        <View style={styles.annotationContainer}>
-          <Image
-            source={{
-              uri: point.point_type.icon
-            }}
-            resizeMode="contain"
-            style={styles.annotationFill}
-          />
-        </View>
-      </MapboxGL.PointAnnotation>
-    );
-  };
+  const renderAnnotation = point => (
+    <MapboxGL.PointAnnotation
+      key={point.entity_id + Date()}
+      id={"post-" + point.entity_id}
+      coordinate={[Number(point.longitude), Number(point.latitude)]}
+      title={point.title}
+      snippet={point.description.substring(0, 35) + "... [Veja mais detalhes]"}
+      onSelected={() => {
+        openInfoModal(point);
+      }}
+    >
+      <View style={styles.annotationContainer}>
+        <Image
+          source={{
+            uri: point.point_type.icon
+          }}
+          resizeMode="contain"
+          style={styles.annotationFill}
+        />
+      </View>
+    </MapboxGL.PointAnnotation>
+  );
 
   const centerMapOnMe = () => {
     const newCenter = [userPosition.longitude, userPosition.latitude];
     const newFollow = !follow;
+    // console.tron.log(follow, newFollow);
+
     setFollow(newFollow);
 
-    if (newFollow) {
-      console.log({ mapCamera });
+    if (follow) {
       setMapCenter(newCenter);
       mapCamera.flyTo(newCenter);
     }
   };
 
-  useEffect(() => {
-    if (Platform.OS === "ios") {
-      Geolocation.requestAuthorization();
-    } else {
-      // Geolocation.requestAndroidLocationPermissions();
-    }
-
+  const handleUserPosition = async () => {
     const observer = Geolocation.watchPosition(
-      position => {
-        setUserPosition(position.coords);
-      },
-      error => {
-        Alert.alert(error.message);
-      },
+      position => setUserPosition(position.coords),
+      error => Alert.alert(error.message),
       { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
     );
 
     setGeoObserver(observer);
 
-    api.loadCategories().then(response => {
-      setCategories(response.data.data);
-    });
+    const { data: response } = await api.loadCategories();
+    setCategories(response.data);
 
-    const degree_update_rate = 3;
-    try {
-      if (CompassHeading) {
-        CompassHeading.start(degree_update_rate, degree => {
-          setCompassHeading(degree);
-        });
-      }
-    } catch (err) {
-      console.log({ err });
-    }
+    if (CompassHeading)
+      CompassHeading.start(3, degree => {
+        setCompassHeading(degree);
+      });
+  };
+
+  useEffect(() => {
+    handleUserPosition();
   }, []);
 
   useEffect(() => {
@@ -180,9 +164,7 @@ const Maps3 = props => {
   }, [userPosition]);
 
   useEffect(() => {
-    if (mapLoaded) {
-      handleMapPan();
-    }
+    if (mapLoaded) handleMapPan();
   }, [mapLoaded]);
 
   useEffect(() => {
@@ -230,47 +212,44 @@ const Maps3 = props => {
 
   const mapCenterOnPoint = async point => {
     if (!mapLoaded) return;
+
     const goToCoords = [
       Number(point.point_type.longitude || point.longitude),
       Number(point.point_type.latitude || point.latitude)
     ];
 
-    console.log({ goToCoords });
-
     if (mapCamera) {
-      await setFollow(false);
+      setFollow(false);
       mapCamera.flyTo(goToCoords);
     } else {
       handleNavigation(point);
     }
   };
 
-  const toggleFilter = async (id, value) => {
+  const toggleFilter = (id, value) => {
     let newFilters = JSON.parse(JSON.stringify(filters));
+
     if (id === "all") {
       newFilters.all = value;
-      for (cat of categories) {
-        newFilters[`point${cat.point_type_id}`] = value;
-      }
+
+      for (cat of categories) newFilters[`point${cat.point_type_id}`] = value;
     } else {
       newFilters[`point${id}`] = value;
 
       const keys = Object.keys(newFilters).filter(k => k !== "all");
-      if (keys.map(k => newFilters[k]).includes(false)) {
-        newFilters.all = false;
-      } else {
-        newFilters.all = true;
-      }
+
+      newFilters.all = true;
+
+      if (keys.map(k => newFilters[k]).includes(false)) newFilters.all = false;
     }
 
-    console.log({ newFilters });
-    await setFilters(newFilters);
+    setFilters(newFilters);
     setTimeout(handleMapPan, 500);
   };
 
-  const cleanField = async () => {
-    await setResult([]);
-    await setSearch("");
+  const cleanField = () => {
+    setResult([]);
+    setSearch("");
   };
 
   return (
@@ -327,9 +306,6 @@ const Maps3 = props => {
               )}{" "}
               kt
             </Text>
-            {/* <Text style={styles.instrumentItem}>
-              {Math.round(magnetometer || 0)}º
-            </Text> */}
             <Text style={styles.instrumentItem}>
               {Math.round(compassHeading || 0)}º
             </Text>
