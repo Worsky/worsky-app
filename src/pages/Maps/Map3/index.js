@@ -73,32 +73,32 @@ const Maps3 = props => {
   };
 
   const handleMapPan = async () => {
-    if (mapLoaded) {
-      const [[lng1, lat1], [lng2, lat2]] = await mapView.getVisibleBounds();
-      const zoom = await mapView.getZoom();
+    if (!mapLoaded) return;
 
-      let pointIds = "";
+    const [[lng1, lat1], [lng2, lat2]] = await mapView.getVisibleBounds();
+    const zoom = await mapView.getZoom();
 
-      if (filters.all === true) {
-        pointIds = Object.keys(filters)
-          .filter(k => k !== "all")
-          .map(key => {
-            return key.replace("point", "");
-          })
-          .join(",");
-      } else {
-        pointIds = Object.keys(filters)
-          .filter(k => k !== "all" && filters[k] === true)
-          .map(key => {
-            return key.replace("point", "");
-          })
-          .join(",");
-      }
+    let pointIds = Object.keys(filters)
+      .filter(k => k !== "all" && filters[k] === true)
+      .map(key => key.replace("point", ""))
+      .join(",");
 
-      api.loadPosts(lat1, lng1, lat2, lng2, zoom, pointIds).then(response => {
-        setPosts(response.data.data);
-      });
-    }
+    if (filters.all === true)
+      pointIds = Object.keys(filters)
+        .filter(k => k !== "all")
+        .map(key => key.replace("point", ""))
+        .join(",");
+
+    const apiResponse = await api.loadPosts(
+      lat1,
+      lng1,
+      lat2,
+      lng2,
+      zoom,
+      pointIds
+    );
+
+    setPosts(apiResponse.data.data);
   };
 
   const renderAnnotation = point => {

@@ -2,11 +2,8 @@ import { apiURLToken } from "~/services/api";
 import { getToken } from "~/services/asyncStorageToken";
 
 const api = {
-  loadCategories: async () => {
-    const { token } = await getToken();
-    console.log({ token });
-    return apiURLToken(token).get("/point-type");
-  },
+  loadCategories: async () =>
+    apiURLToken((await getToken()).token).get("/point-type"),
 
   loadPosts: async (
     latitude1,
@@ -27,7 +24,7 @@ const api = {
     params.append("point_type_id", point_type_id);
 
     const callUrl = `/map/nearby?${params.toString()}`;
-    console.log({ callUrl });
+
     return apiURLToken(token).get(callUrl, {});
   },
 
