@@ -2,7 +2,8 @@ import "./config/ReactotronConfig";
 import "./config/DevToolsConfig";
 
 import React, { Component } from "react";
-import { View, Platform, AsyncStorage } from "react-native";
+import { View, Platform } from "react-native";
+import AsyncStorage from "@react-native-community/async-storage";
 import { Provider } from "react-redux";
 import TestFairy from "react-native-testfairy";
 import OneSignal from "react-native-onesignal";
