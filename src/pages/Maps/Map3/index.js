@@ -127,11 +127,11 @@ const Maps3 = props => {
   const centerMapOnMe = () => {
     const newCenter = [userPosition.longitude, userPosition.latitude];
     const newFollow = !follow;
-    // console.tron.log(follow, newFollow);
 
     setFollow(newFollow);
 
-    if (follow) {
+    if (newFollow) {
+      console.tron.log(newFollow);
       setMapCenter(newCenter);
       mapCamera.flyTo(newCenter);
     }
