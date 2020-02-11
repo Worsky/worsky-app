@@ -10,6 +10,7 @@ import AutocompleteItem from "~/components/AutocompleteItem";
 import CustomModal from "~/components/CustomModal";
 import MapNumberMarkers from "~/components/MapNumberMarkers";
 import MapFilterModalContent from "~/components/MapFilterModalContent";
+import MapMarker from "~/components/MapMarker";
 
 import { metrics } from "~/styles";
 import { plane } from "~/assets";
@@ -84,29 +85,6 @@ const Maps3 = props => {
 
     setPosts(apiResponse.data.data);
   };
-
-  const renderAnnotation = point => (
-    <MapboxGL.PointAnnotation
-      key={point.entity_id + Date()}
-      id={"post-" + point.entity_id}
-      coordinate={[Number(point.longitude), Number(point.latitude)]}
-      title={point.title}
-      snippet={point.description.substring(0, 35) + "... [Veja mais detalhes]"}
-      onSelected={() => {
-        openInfoModal(point);
-      }}
-    >
-      <View style={styles.annotationContainer}>
-        <Image
-          source={{
-            uri: point.point_type.icon
-          }}
-          resizeMode="contain"
-          style={styles.annotationFill}
-        />
-      </View>
-    </MapboxGL.PointAnnotation>
-  );
 
   const centerMapOnMe = () => {
     const newCenter = [userPosition.longitude, userPosition.latitude];
@@ -252,7 +230,9 @@ const Maps3 = props => {
         compassEnabled={true}
         onRegionDidChange={handleMapPan}
       >
-        {posts.map(renderAnnotation)}
+        {posts.map(point => (
+          <MapMarker point={point} openInfoModal={openInfoModal} />
+        ))}
         <MapboxGL.UserLocation visible />
         <MapboxGL.Camera
           zoomLevel={12}
