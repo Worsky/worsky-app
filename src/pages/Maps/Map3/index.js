@@ -237,61 +237,52 @@ const Maps3 = props => {
 
   return (
     <View style={styles.container}>
-      {userPosition && (
-        <MapboxGL.MapView
-          style={{ flex: 1 }}
-          onDidFinishLoadingMap={() => {
-            setMapLoaded(true);
-          }}
-          rotateEnabled={false}
-          compassEnabled
-          animated
-          ref={setMapView}
-          showUserLocation
-          styleURL={MapboxGL.StyleURL.Light}
-          logoEnabled={false}
-          compassEnabled={true}
-          onRegionDidChange={handleMapPan}
-        >
-          {posts.map(renderAnnotation)}
-          <MapboxGL.UserLocation visible />
-          <MapboxGL.Camera
-            zoomLevel={12}
-            followHeading={1}
-            followUserLocation={follow}
-            followUserMode={follow ? "course" : "normal"}
-            ref={setMapCamera}
-          />
-        </MapboxGL.MapView>
-      )}
-      {userPosition && (
-        <>
-          <Image
-            source={plane}
-            style={styles.planeOnMap}
-            height={64}
-            width={64}
-          />
-          <TouchableOpacity
-            style={styles.myPositionButton}
-            onPress={centerMapOnMe}
-          >
-            <Icon name="crosshairs" size={22} color={"black"} />
-          </TouchableOpacity>
-          <View style={styles.instruments}>
-            <MapNumberMarkers
-              text={`${Math.round(
-                (userPosition.speed < 0 ? 0 : userPosition.speed) * 1.94384
-              )}${" "}
+      <MapboxGL.MapView
+        style={{ flex: 1 }}
+        onDidFinishLoadingMap={() => {
+          setMapLoaded(true);
+        }}
+        rotateEnabled={false}
+        compassEnabled
+        animated
+        ref={setMapView}
+        showUserLocation
+        styleURL={MapboxGL.StyleURL.Light}
+        logoEnabled={false}
+        compassEnabled={true}
+        onRegionDidChange={handleMapPan}
+      >
+        {posts.map(renderAnnotation)}
+        <MapboxGL.UserLocation visible />
+        <MapboxGL.Camera
+          zoomLevel={12}
+          followHeading={1}
+          followUserLocation={follow}
+          followUserMode={follow ? "course" : "normal"}
+          ref={setMapCamera}
+        />
+      </MapboxGL.MapView>
+
+      <Image source={plane} style={styles.planeOnMap} height={64} width={64} />
+
+      <TouchableOpacity style={styles.myPositionButton} onPress={centerMapOnMe}>
+        <Icon name="crosshairs" size={22} color={"black"} />
+      </TouchableOpacity>
+
+      <View style={styles.instruments}>
+        <MapNumberMarkers
+          text={`${Math.round(
+            (userPosition.speed < 0 ? 0 : userPosition.speed) * 1.94384
+          )}${" "}
               kt`}
-            />
-            <MapNumberMarkers text={`${Math.round(compassHeading || 0)}º`} />
-            <MapNumberMarkers
-              text={`${Math.round(userPosition.altitude * 3.28084)} ft`}
-            />
-          </View>
-        </>
-      )}
+        />
+
+        <MapNumberMarkers text={`${Math.round(compassHeading || 0)}º`} />
+
+        <MapNumberMarkers
+          text={`${Math.round(userPosition.altitude * 3.28084)} ft`}
+        />
+      </View>
 
       <View style={styles.searchContainer}>
         <Autocomplete
@@ -324,6 +315,7 @@ const Maps3 = props => {
         >
           <Icon name="filter" style={styles.filterIcon} size={24} />
         </TouchableOpacity>
+
         <CustomModal
           visible={filterModalVisible}
           changeVisibility={() => setFilterModalVisible(false)}

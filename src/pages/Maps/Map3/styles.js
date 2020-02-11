@@ -26,7 +26,7 @@ const styles = StyleSheet.create({
         paddingTop: 35
       },
       android: {
-        paddingRight: 40
+        // paddingRight: 20
       }
     })
   },
@@ -51,11 +51,11 @@ const styles = StyleSheet.create({
   },
 
   filterIconContainer: {
-    height: "100%",
-    width: 30,
-    height: 20,
-    marginTop: 20,
-    textAlign: "center"
+    width: 60,
+    height: 40,
+    marginTop: 10,
+    justifyContent: "center",
+    alignItems: "center"
   },
 
   autocomplete: {
