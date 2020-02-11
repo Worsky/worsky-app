@@ -140,25 +140,6 @@ const styles = StyleSheet.create({
     transform: [{ translateX: -32 }, { translateY: -32 }]
   },
 
-  filterIcon: {},
-
-  filterLabel: {
-    paddingHorizontal: 16
-  },
-
-  checkboxForm: {
-    flex: 1,
-    flexDirection: "column",
-    alignContent: "flex-start",
-    height: 260
-  },
-
-  checkboxField: {
-    flex: 1,
-    flexDirection: "row",
-    // height: 60,
-    alignItems: "center"
-  },
   moreDetailButton: {
     width: "100%",
     alignContent: "center",

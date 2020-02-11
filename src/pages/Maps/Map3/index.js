@@ -1,27 +1,21 @@
-import React, { useState, useEffect, use } from "react";
-import {
-  View,
-  Platform,
-  Image,
-  TouchableOpacity,
-  Text,
-  Switch
-} from "react-native";
+import React, { useState, useEffect } from "react";
+import { View, Image, TouchableOpacity, Text } from "react-native";
 import Icon from "react-native-vector-icons/FontAwesome";
-
-import { metrics } from "~/styles";
-import styles from "./styles";
-
 import MapboxGL from "@react-native-mapbox-gl/maps";
-import { plane } from "~/assets";
 import Geolocation from "@react-native-community/geolocation";
 import Autocomplete from "react-native-autocomplete-input";
+import CompassHeading from "react-native-compass-heading";
+
 import AutocompleteItem from "~/components/AutocompleteItem";
 import CustomModal from "~/components/CustomModal";
-import { throttle } from "lodash";
+import MapNumberMarkers from "~/components/MapNumberMarkers";
+import MapFilterModalContent from "~/components/MapFilterModalContent";
 
+import { metrics } from "~/styles";
+import { plane } from "~/assets";
+
+import styles from "./styles";
 import api from "./api";
-import CompassHeading from "react-native-compass-heading";
 
 MapboxGL.setAccessToken(
   "sk.eyJ1Ijoiam9lbGJhbnphdHRvIiwiYSI6ImNrNDk2cmkzNzAwdHkzZHMyY2x2ZGh0eXYifQ.EeAfcaGLuGKv0FV90GT27g"
@@ -34,8 +28,6 @@ const Maps3 = props => {
   const [mapLoaded, setMapLoaded] = useState(false);
   const [mapView, setMapView] = useState(null);
   const [mapCamera, setMapCamera] = useState(null);
-  const [mapCenter, setMapCenter] = useState(null);
-  const [geoObserver, setGeoObserver] = useState(null);
   const [userPosition, setUserPosition] = useState({});
   const [filters, setFilters] = useState({ all: true });
   const [search, setSearch] = useState("");
@@ -43,8 +35,6 @@ const Maps3 = props => {
   const [infoModalVisible, setInfoModalVisible] = useState(false);
   const [filterModalVisible, setFilterModalVisible] = useState(false);
   const [follow, setFollow] = useState(true);
-  const [magnetometer, setMagnetometer] = useState(0);
-  const [loadingSearch, setLoadingSearch] = useState(false);
   const [compassHeading, setCompassHeading] = useState(0);
 
   const handleSearch = async data => {
@@ -55,15 +45,9 @@ const Maps3 = props => {
 
     const [longitude, latitude] = await mapView.getCenter();
 
-    setLoadingSearch(true);
-    api
-      .loadSearch(data, latitude, longitude)
-      .then(response => {
-        setResult(response.data.data);
-      })
-      .finally(() => {
-        setLoadingSearch(false);
-      });
+    const response = await api.loadSearch(data, latitude, longitude);
+
+    setResult(response.data.data);
   };
 
   const openInfoModal = point => {
@@ -133,13 +117,11 @@ const Maps3 = props => {
   };
 
   const handleUserPosition = async () => {
-    const observer = Geolocation.watchPosition(
+    Geolocation.watchPosition(
       position => setUserPosition(position.coords),
       error => Alert.alert(error.message),
       { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
     );
-
-    setGeoObserver(observer);
 
     const { data: response } = await api.loadCategories();
     setCategories(response.data);
@@ -205,6 +187,12 @@ const Maps3 = props => {
       : false;
   };
 
+  const cleanSearchAndCenterMap = async point => {
+    setSearch("");
+    setResult([]);
+    await mapCenterOnPoint(point);
+  };
+
   const mapCenterOnPoint = async point => {
     if (!mapLoaded) return;
 
@@ -212,6 +200,8 @@ const Maps3 = props => {
       Number(point.point_type.longitude || point.longitude),
       Number(point.point_type.latitude || point.latitude)
     ];
+
+    console.tron.log(follow);
 
     if (mapCamera) {
       setFollow(false);
@@ -291,18 +281,16 @@ const Maps3 = props => {
             <Icon name="crosshairs" size={22} color={"black"} />
           </TouchableOpacity>
           <View style={styles.instruments}>
-            <Text style={styles.instrumentItem}>
-              {Math.round(
+            <MapNumberMarkers
+              text={`${Math.round(
                 (userPosition.speed < 0 ? 0 : userPosition.speed) * 1.94384
-              )}{" "}
-              kt
-            </Text>
-            <Text style={styles.instrumentItem}>
-              {Math.round(compassHeading || 0)}º
-            </Text>
-            <Text style={styles.instrumentItem}>
-              {Math.round(userPosition.altitude * 3.28084)} ft
-            </Text>
+              )}${" "}
+              kt`}
+            />
+            <MapNumberMarkers text={`${Math.round(compassHeading || 0)}º`} />
+            <MapNumberMarkers
+              text={`${Math.round(userPosition.altitude * 3.28084)} ft`}
+            />
           </View>
         </>
       )}
@@ -310,7 +298,7 @@ const Maps3 = props => {
       <View style={styles.searchContainer}>
         <Autocomplete
           data={result}
-          onChangeText={throttle(handleSearch, 600)}
+          onChangeText={text => handleSearch(text)}
           clearButtonMode="while-editing"
           value={search}
           style={styles.autocomplete}
@@ -318,7 +306,7 @@ const Maps3 = props => {
           renderItem={({ item }) => (
             <AutocompleteItem
               item={item}
-              handleClick={mapCenterOnPoint}
+              handleClick={cleanSearchAndCenterMap}
               cleanField={cleanField}
             />
           )}
@@ -343,32 +331,7 @@ const Maps3 = props => {
           changeVisibility={() => setFilterModalVisible(false)}
           maxHeight={540}
           content={
-            <View style={styles.checkboxForm}>
-              <Text>Show on map these point types: </Text>
-              <View style={styles.checkboxField}>
-                <Switch
-                  value={filters.all}
-                  onValueChange={value => toggleFilter("all", value)}
-                />
-                <Text style={styles.filterLabel}>All types</Text>
-              </View>
-              {categories.map((item, index) => (
-                <View key={`category${index}`} style={styles.checkboxField}>
-                  <Switch
-                    value={
-                      filters[`point${item.point_type_id}`] == null ||
-                      filters[`point${item.point_type_id}`] == undefined
-                        ? true
-                        : filters[`point${item.point_type_id}`]
-                    }
-                    onValueChange={value =>
-                      toggleFilter(item.point_type_id, value)
-                    }
-                  />
-                  <Text style={styles.filterLabel}>{item.name}</Text>
-                </View>
-              ))}
-            </View>
+            <MapFilterModalContent filters={filters} categories={categories} />
           }
           close={true}
         />
