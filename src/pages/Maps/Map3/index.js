@@ -187,21 +187,19 @@ const Maps3 = props => {
       : false;
   };
 
-  const cleanSearchAndCenterMap = async point => {
+  const cleanSearchAndCenterMap = point => {
     setSearch("");
     setResult([]);
-    await mapCenterOnPoint(point);
+    mapCenterOnPoint(point);
   };
 
-  const mapCenterOnPoint = async point => {
+  const mapCenterOnPoint = point => {
     if (!mapLoaded) return;
 
     const goToCoords = [
       Number(point.point_type.longitude || point.longitude),
       Number(point.point_type.latitude || point.latitude)
     ];
-
-    console.tron.log(follow);
 
     if (mapCamera) {
       setFollow(false);
@@ -331,7 +329,11 @@ const Maps3 = props => {
           changeVisibility={() => setFilterModalVisible(false)}
           maxHeight={540}
           content={
-            <MapFilterModalContent filters={filters} categories={categories} />
+            <MapFilterModalContent
+              filters={filters}
+              categories={categories}
+              toggleFilter={toggleFilter}
+            />
           }
           close={true}
         />

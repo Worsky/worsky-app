@@ -4,7 +4,7 @@ import PropTypes from "prop-types";
 
 import styles from "./styles";
 
-const MapFilterModalContent = ({ filters, categories }) => (
+const MapFilterModalContent = ({ filters, categories, toggleFilter }) => (
   <View style={styles.checkboxForm}>
     <Text>Show on map these point types: </Text>
     <View style={styles.checkboxField}>
@@ -33,7 +33,8 @@ const MapFilterModalContent = ({ filters, categories }) => (
 
 MapFilterModalContent.propTypes = {
   filters: PropTypes.any,
-  categories: PropTypes.any
+  categories: PropTypes.any,
+  toggleFilter: PropTypes.func
 };
 
 export default MapFilterModalContent;
