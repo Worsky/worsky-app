@@ -48,14 +48,14 @@ const Maps3 = props => {
   const [compassHeading, setCompassHeading] = useState(0);
 
   const handleSearch = async data => {
-    await setSearch(data);
-    await setResult([]);
+    setSearch(data);
+    setResult([]);
 
     if (search.length < 3) return;
 
     const [longitude, latitude] = await mapView.getCenter();
 
-    await setLoadingSearch(true);
+    setLoadingSearch(true);
     api
       .loadSearch(data, latitude, longitude)
       .then(response => {
@@ -126,15 +126,10 @@ const Maps3 = props => {
 
   const centerMapOnMe = () => {
     const newCenter = [userPosition.longitude, userPosition.latitude];
-    const newFollow = !follow;
 
-    setFollow(newFollow);
+    setFollow(false);
 
-    if (newFollow) {
-      console.tron.log(newFollow);
-      setMapCenter(newCenter);
-      mapCamera.flyTo(newCenter);
-    }
+    mapCamera.flyTo(newCenter);
   };
 
   const handleUserPosition = async () => {
@@ -293,11 +288,7 @@ const Maps3 = props => {
             style={styles.myPositionButton}
             onPress={centerMapOnMe}
           >
-            <Icon
-              name="crosshairs"
-              size={22}
-              color={follow ? "black" : "#bbb"}
-            />
+            <Icon name="crosshairs" size={22} color={"black"} />
           </TouchableOpacity>
           <View style={styles.instruments}>
             <Text style={styles.instrumentItem}>

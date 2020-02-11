@@ -74,7 +74,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     left: 4,
     right: 4,
-    top: 100,
+    top: 70,
     backgroundColor: "transparent",
     flex: 1,
     flexDirection: "row",
