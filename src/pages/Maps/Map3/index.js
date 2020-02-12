@@ -231,7 +231,11 @@ const Maps3 = props => {
         onRegionDidChange={handleMapPan}
       >
         {posts.map(point => (
-          <MapMarker point={point} openInfoModal={openInfoModal} />
+          <MapMarker
+            point={point}
+            key={point.entity_id}
+            openInfoModal={openInfoModal}
+          />
         ))}
         <MapboxGL.UserLocation visible />
         <MapboxGL.Camera
