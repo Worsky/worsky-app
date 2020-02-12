@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, Image, TouchableOpacity, Text } from "react-native";
+import { View, Image, TouchableOpacity, Text, Keyboard } from "react-native";
 import Icon from "react-native-vector-icons/FontAwesome";
 import MapboxGL from "@react-native-mapbox-gl/maps";
 import Geolocation from "@react-native-community/geolocation";
@@ -168,6 +168,7 @@ const Maps3 = props => {
   const cleanSearchAndCenterMap = point => {
     setSearch("");
     setResult([]);
+    Keyboard.dismiss();
     mapCenterOnPoint(point);
   };
 

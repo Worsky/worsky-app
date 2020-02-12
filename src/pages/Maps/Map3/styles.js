@@ -55,7 +55,8 @@ const styles = StyleSheet.create({
     height: 40,
     marginTop: 10,
     justifyContent: "center",
-    alignItems: "center"
+    alignItems: "center",
+    zIndex: 150
   },
 
   autocomplete: {
