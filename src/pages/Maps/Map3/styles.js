@@ -15,7 +15,7 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: "row",
     position: "absolute",
-    zIndex: 99,
+    // zIndex: 99,
     padding: metrics.basePadding / 2,
     justifyContent: "space-between",
     alignItems: "center",
@@ -55,8 +55,7 @@ const styles = StyleSheet.create({
     height: 40,
     marginTop: 10,
     justifyContent: "center",
-    alignItems: "center",
-    zIndex: 150
+    alignItems: "center"
   },
 
   autocomplete: {

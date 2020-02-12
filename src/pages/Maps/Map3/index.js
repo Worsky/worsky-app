@@ -293,13 +293,14 @@ const Maps3 = props => {
           inputContainerStyle={{ borderColor: "white" }}
           keyboardShouldPersistTaps="always"
         />
-
-        <TouchableOpacity
-          style={styles.filterIconContainer}
-          onPress={() => setFilterModalVisible(true)}
-        >
-          <Icon name="filter" style={styles.filterIcon} size={24} />
-        </TouchableOpacity>
+        {result.length == 0 && (
+          <TouchableOpacity
+            style={styles.filterIconContainer}
+            onPress={() => setFilterModalVisible(true)}
+          >
+            <Icon name="filter" style={styles.filterIcon} size={24} />
+          </TouchableOpacity>
+        )}
 
         <CustomModal
           visible={filterModalVisible}
