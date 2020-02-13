@@ -58,32 +58,36 @@ const Maps3 = props => {
   };
 
   const handleMapPan = async () => {
-    if (!mapLoaded) return;
+    try {
+      if (!mapLoaded) return;
 
-    const [[lng1, lat1], [lng2, lat2]] = await mapView.getVisibleBounds();
-    const zoom = await mapView.getZoom();
+      const [[lng1, lat1], [lng2, lat2]] = await mapView.getVisibleBounds();
+      const zoom = await mapView.getZoom();
 
-    let pointIds = Object.keys(filters)
-      .filter(k => k !== "all" && filters[k] === true)
-      .map(key => key.replace("point", ""))
-      .join(",");
-
-    if (filters.all === true)
-      pointIds = Object.keys(filters)
-        .filter(k => k !== "all")
+      let pointIds = Object.keys(filters)
+        .filter(k => k !== "all" && filters[k] === true)
         .map(key => key.replace("point", ""))
         .join(",");
 
-    const apiResponse = await api.loadPosts(
-      lat1,
-      lng1,
-      lat2,
-      lng2,
-      zoom,
-      pointIds
-    );
+      if (filters.all === true)
+        pointIds = Object.keys(filters)
+          .filter(k => k !== "all")
+          .map(key => key.replace("point", ""))
+          .join(",");
 
-    setPosts(apiResponse.data.data);
+      const apiResponse = await api.loadPosts(
+        lat1,
+        lng1,
+        lat2,
+        lng2,
+        zoom,
+        pointIds
+      );
+
+      setPosts(apiResponse.data.data);
+    } catch (error) {
+      return error;
+    }
   };
 
   const centerMapOnMe = () => {
@@ -116,7 +120,7 @@ const Maps3 = props => {
 
   useEffect(() => {
     handleMapPan();
-  }, [userPosition]);
+  }, [userPosition, filters]);
 
   useEffect(() => {
     if (mapLoaded) handleMapPan();
@@ -206,7 +210,6 @@ const Maps3 = props => {
     }
 
     setFilters(newFilters);
-    setTimeout(handleMapPan, 500);
   };
 
   const cleanField = () => {
@@ -220,6 +223,7 @@ const Maps3 = props => {
         style={{ flex: 1 }}
         onDidFinishLoadingMap={() => {
           setMapLoaded(true);
+          setFollow(false);
         }}
         rotateEnabled={false}
         compassEnabled

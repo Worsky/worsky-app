@@ -21,7 +21,7 @@ const api = {
     params.append("lat2", latitude2);
     params.append("lng2", longitude2);
     params.append("zoom", Math.round(zoom));
-    params.append("point_type_id", point_type_id);
+    if (point_type_id) params.append("point_type_id", point_type_id);
 
     const callUrl = `/map/nearby?${params.toString()}`;
 
