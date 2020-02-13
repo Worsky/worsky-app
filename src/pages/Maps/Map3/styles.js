@@ -62,7 +62,7 @@ const styles = StyleSheet.create({
     height: Platform.OS == "ios" ? 30 : 35,
     width: metrics.width - 80,
     marginTop: metrics.baseMargin,
-    backgroundColor: colors.worSky.grey,
+    backgroundColor: colors.worSky.lighter,
     borderRadius: metrics.baseRadius * 6,
     textAlign: "center",
     paddingHorizontal: 20,
@@ -103,6 +103,7 @@ const styles = StyleSheet.create({
   },
 
   myPositionButton: {
+    flex: 1,
     position: "absolute",
     right: 8,
     bottom: 5,
@@ -110,9 +111,14 @@ const styles = StyleSheet.create({
     height: 50,
     borderRadius: 25,
     backgroundColor: "white",
-    borderColor: "rgba(0,0,0,0.5)",
-    borderWidth: 1,
-    flex: 1,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 5
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
     justifyContent: "center",
     alignItems: "center"
   },
