@@ -24,8 +24,12 @@ const style = StyleSheet.create({
 
   closeContainer: {
     height: 36,
+    width: metrics.width / 1.38,
+    marginTop: metrics.baseMargin,
     justifyContent: "flex-end",
-    alignItems: "center"
+    alignItems: "center",
+    borderTopColor: colors.worSky.lighter,
+    borderTopWidth: 1
   },
 
   closeButtom: {
@@ -36,7 +40,7 @@ const style = StyleSheet.create({
   },
 
   closeText: {
-    color: "black",
+    // color: "black",
     fontWeight: "bold",
     fontSize: 15
   }
