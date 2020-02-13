@@ -2,6 +2,7 @@ apply plugin: "com.android.application"
 
 import com.android.build.OutputFile
 
+
 /**
  * The react.gradle file registers a task for each build variant (e.g. bundleDebugJsAndAssets
  * and bundleReleaseJsAndAssets).
@@ -150,9 +151,14 @@ android {
 }
 
 dependencies {
-    implementation project(':react-native-sensors')
-    implementation project(':@react-native-community_geolocation')
+    implementation project(':@react-native-community_async-storage')
+    implementation project(':react-native-screens')
+    implementation project(':react-native-compass-heading')
     implementation project(':react-native-onesignal')
+    implementation project(':@react-native-community_geolocation')
+    implementation project(':react-native-webview')
+    implementation project(':react-native-geolocation-service')
+    implementation project(':react-native-sensors')
     implementation project(':react-native-firebase')
     implementation project(':react-native-video')
     implementation project(':react-native-image-picker')
@@ -162,6 +168,9 @@ dependencies {
     implementation 'com.google.android.gms:play-services-location:15.0.1'
     implementation "com.google.firebase:firebase-core:16.0.9"
     implementation "com.google.firebase:firebase-messaging:18.0.0"
+
+    implementation 'androidx.appcompat:appcompat:1.1.0-rc01'
+    implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0-alpha02'
 
     implementation project(':react-native-reanimated')
     implementation project(':react-native-testfairy')
@@ -180,3 +189,4 @@ task copyDownloadableDepsToLibs(type: Copy) {
     into 'libs'
 }
 apply plugin: 'com.google.gms.google-services'
+com.google.gms.googleservices.GoogleServicesPlugin.config.disableVersionCheck = true
