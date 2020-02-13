@@ -203,6 +203,7 @@ const Maps3 = props => {
       newFilters[`point${id}`] = value;
 
       const keys = Object.keys(newFilters).filter(k => k !== "all");
+      console.tron.log(newFilters, keys);
 
       newFilters.all = true;
 
