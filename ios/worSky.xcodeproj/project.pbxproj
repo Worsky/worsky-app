@@ -13,7 +13,6 @@
 		00C302E91ABCBA2D00DB3ED1 /* libRCTNetwork.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 00C302DC1ABCB9D200DB3ED1 /* libRCTNetwork.a */; };
 		00C302EA1ABCBA2D00DB3ED1 /* libRCTVibration.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 00C302E41ABCB9EE00DB3ED1 /* libRCTVibration.a */; };
 		00E356F31AD99517003FC87E /* worskyTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 00E356F21AD99517003FC87E /* worskyTests.m */; };
-		030112FCAC1F49FBAE318169 /* libRCTOneSignal.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 96F0CEBFFE5B4F8E983D81FB /* libRCTOneSignal.a */; };
 		0B96AC0E4F6B49B3B8F7F8DE /* EvilIcons.ttf in Resources */ = {isa = PBXBuildFile; fileRef = D0270309136E44698DD2185F /* EvilIcons.ttf */; };
 		10F68E2CFD374D748CCA4415 /* MaterialIcons.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 16516ECF768A4B8DB5C24445 /* MaterialIcons.ttf */; };
 		11D1A2F320CAFA9E000508D9 /* libRCTAnimation.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 5E9157331DD0AC6500FF2AA8 /* libRCTAnimation.a */; };
@@ -416,13 +415,6 @@
 			remoteGlobalIDString = A39873CE1EA65EE60051E01A;
 			remoteInfo = "RNVectorIcons-tvOS";
 		};
-		F6BF8B102350D22E00E6E80E /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 44DEDBCC92084975B1F18D7C /* RCTOneSignal.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 3245CDED1BFEE35C00EABF68;
-			remoteInfo = RCTOneSignal;
-		};
 		F6BF8B132350D22E00E6E80E /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 5787F5EAB5104C999026A1F1 /* RNFirebase.xcodeproj */;
@@ -474,7 +466,6 @@
 		2D02E4901E0B4A5D006451C7 /* worsky-tvOSTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "worsky-tvOSTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		2D16E6891FA4F8E400B85C8A /* libReact.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; path = libReact.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		32F020457932435BA57E7C2D /* libRNFirebase.a */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = archive.ar; path = libRNFirebase.a; sourceTree = "<group>"; };
-		44DEDBCC92084975B1F18D7C /* RCTOneSignal.xcodeproj */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = "wrapper.pb-project"; name = RCTOneSignal.xcodeproj; path = "../node_modules/react-native-onesignal/ios/RCTOneSignal.xcodeproj"; sourceTree = "<group>"; };
 		4C2731E828DE427396D9248A /* libRCTVideo.a */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = archive.ar; path = libRCTVideo.a; sourceTree = "<group>"; };
 		4FD7D48E1E39D078CED89067 /* libPods-worsky-tvOSTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-worsky-tvOSTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		564633CC4E5B4C80AA09D34A /* RNReanimated.xcodeproj */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = "wrapper.pb-project"; name = RNReanimated.xcodeproj; path = "../node_modules/react-native-reanimated/ios/RNReanimated.xcodeproj"; sourceTree = "<group>"; };
@@ -492,7 +483,6 @@
 		8811646F69A2FE4AB714A9B7 /* libPods-worsky.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-worsky.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		8CF6246B52FD48D197D681B4 /* libRNReanimated-tvOS.a */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = archive.ar; path = "libRNReanimated-tvOS.a"; sourceTree = "<group>"; };
 		8CF807781C7042368648372E /* libRNGestureHandler-tvOS.a */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = archive.ar; path = "libRNGestureHandler-tvOS.a"; sourceTree = "<group>"; };
-		96F0CEBFFE5B4F8E983D81FB /* libRCTOneSignal.a */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = archive.ar; path = libRCTOneSignal.a; sourceTree = "<group>"; };
 		9779A381D6D14907B516676C /* libRNVectorIcons.a */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = archive.ar; path = libRNVectorIcons.a; sourceTree = "<group>"; };
 		AC08FF8B406F41D1BE02D81D /* libRNReanimated.a */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = archive.ar; path = libRNReanimated.a; sourceTree = "<group>"; };
 		ADBDB91F1DFEBF0600ED6528 /* RCTBlob.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTBlob.xcodeproj; path = "../node_modules/react-native/Libraries/Blob/RCTBlob.xcodeproj"; sourceTree = "<group>"; };
@@ -551,7 +541,6 @@
 				E9805165CC304FD4B16C5B6B /* libRNImagePicker.a in Frameworks */,
 				4AABB99D4C21461883C2DD23 /* libRCTVideo.a in Frameworks */,
 				CDF215CF0B8E4E13A794BA6E /* libRNFirebase.a in Frameworks */,
-				030112FCAC1F49FBAE318169 /* libRCTOneSignal.a in Frameworks */,
 				24E4E4CFD209C5DDC27AC7A5 /* libPods-worsky.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -758,7 +747,6 @@
 				ED8E5EAE31514CDC9EDDEF0C /* RNImagePicker.xcodeproj */,
 				292F88A81174483F801B50F1 /* RCTVideo.xcodeproj */,
 				5787F5EAB5104C999026A1F1 /* RNFirebase.xcodeproj */,
-				44DEDBCC92084975B1F18D7C /* RCTOneSignal.xcodeproj */,
 			);
 			name = Libraries;
 			sourceTree = "<group>";
@@ -920,14 +908,6 @@
 			isa = PBXGroup;
 			children = (
 				F6BF8B142350D22E00E6E80E /* libRNFirebase.a */,
-			);
-			name = Products;
-			sourceTree = "<group>";
-		};
-		F6BF8B0D2350D22E00E6E80E /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				F6BF8B112350D22E00E6E80E /* libRCTOneSignal.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -1099,10 +1079,6 @@
 				{
 					ProductGroup = 00C302D41ABCB9D200DB3ED1 /* Products */;
 					ProjectRef = 00C302D31ABCB9D200DB3ED1 /* RCTNetwork.xcodeproj */;
-				},
-				{
-					ProductGroup = F6BF8B0D2350D22E00E6E80E /* Products */;
-					ProjectRef = 44DEDBCC92084975B1F18D7C /* RCTOneSignal.xcodeproj */;
 				},
 				{
 					ProductGroup = 139105B71AF99BAD00B5F7CC /* Products */;
@@ -1493,13 +1469,6 @@
 			remoteRef = F6B049C622E093660077A6A8 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		F6BF8B112350D22E00E6E80E /* libRCTOneSignal.a */ = {
-			isa = PBXReferenceProxy;
-			fileType = archive.ar;
-			path = libRCTOneSignal.a;
-			remoteRef = F6BF8B102350D22E00E6E80E /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
 		F6BF8B142350D22E00E6E80E /* libRNFirebase.a */ = {
 			isa = PBXReferenceProxy;
 			fileType = archive.ar;
@@ -1809,7 +1778,7 @@
 				CODE_SIGN_ENTITLEMENTS = worsky/worsky.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 19;
+				CURRENT_PROJECT_VERSION = 21;
 				DEAD_CODE_STRIPPING = NO;
 				DEVELOPMENT_TEAM = T6QK5ZLDQ9;
 				GCC_PREPROCESSOR_DEFINITIONS = (
@@ -1857,7 +1826,7 @@
 				CODE_SIGN_ENTITLEMENTS = worsky/worsky.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 19;
+				CURRENT_PROJECT_VERSION = 21;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = T6QK5ZLDQ9;
 				GCC_PREPROCESSOR_DEFINITIONS = (

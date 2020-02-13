@@ -13,7 +13,8 @@ const AutocompleteItem = ({
   item,
   navigation = false,
   cleanField,
-  callbackCoordinate = false
+  callbackCoordinate = false,
+  handleClick = null
 }) => {
   if (Object.keys(item).length < 0) return null;
 
@@ -23,7 +24,9 @@ const AutocompleteItem = ({
   return (
     <TouchableOpacity
       onPress={() =>
-        navigation
+        handleClick
+          ? handleClick(item)
+          : navigation
           ? handleClick(navigation, cleanField, item)
           : callbackCoordinate(
               item.point_type.latitude,
@@ -51,6 +54,7 @@ AutocompleteItem.propTypes = {
   item: PropTypes.object.isRequired,
   navigation: PropTypes.object,
   cleanField: PropTypes.func.isRequired,
+  handleClick: PropTypes.func,
   callbackCoordinate: PropTypes.func
 };
 
