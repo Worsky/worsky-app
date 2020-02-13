@@ -34,7 +34,7 @@ const Maps3 = props => {
   const [search, setSearch] = useState("");
   const [infoPoint, setInfoPoint] = useState(null);
   const [infoModalVisible, setInfoModalVisible] = useState(false);
-  const [filterModalVisible, setFilterModalVisible] = useState(true);
+  const [filterModalVisible, setFilterModalVisible] = useState(false);
   const [follow, setFollow] = useState(true);
   const [compassHeading, setCompassHeading] = useState(0);
 
@@ -52,6 +52,7 @@ const Maps3 = props => {
   };
 
   const openInfoModal = point => {
+    console.tron.log("click");
     setInfoPoint(point);
     setInfoModalVisible(true);
     mapCenterOnPoint(point);
@@ -203,7 +204,6 @@ const Maps3 = props => {
       newFilters[`point${id}`] = value;
 
       const keys = Object.keys(newFilters).filter(k => k !== "all");
-      console.tron.log(newFilters, keys);
 
       newFilters.all = true;
 
@@ -240,7 +240,7 @@ const Maps3 = props => {
           <MapMarker
             point={point}
             key={point.entity_id}
-            openInfoModal={openInfoModal}
+            openInfoModal={() => openInfoModal(point)}
           />
         ))}
         <MapboxGL.UserLocation visible />

@@ -12,9 +12,7 @@ const MapMarker = ({ point, openInfoModal }) => {
       coordinate={[Number(point.longitude), Number(point.latitude)]}
       title={point.title}
       snippet={point.description.substring(0, 35) + "... [Veja mais detalhes]"}
-      onSelected={() => {
-        openInfoModal(point);
-      }}
+      onSelected={() => openInfoModal()}
     >
       <View style={styles.annotationContainer}>
         <Image
