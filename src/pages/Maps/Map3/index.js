@@ -34,7 +34,7 @@ const Maps3 = props => {
   const [search, setSearch] = useState("");
   const [infoPoint, setInfoPoint] = useState(null);
   const [infoModalVisible, setInfoModalVisible] = useState(false);
-  const [filterModalVisible, setFilterModalVisible] = useState(false);
+  const [filterModalVisible, setFilterModalVisible] = useState(true);
   const [follow, setFollow] = useState(true);
   const [compassHeading, setCompassHeading] = useState(0);
 

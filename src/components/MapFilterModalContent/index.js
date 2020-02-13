@@ -2,11 +2,13 @@ import React from "react";
 import { View, Text, Switch } from "react-native";
 import PropTypes from "prop-types";
 
+import ModalHeader from "~/components/ModalHeader";
+
 import styles from "./styles";
 
 const MapFilterModalContent = ({ filters, categories, toggleFilter }) => (
   <View style={styles.checkboxForm}>
-    <Text>Show on map these point types: </Text>
+    <ModalHeader />
     <View style={styles.checkboxField}>
       <Switch
         value={filters.all}
