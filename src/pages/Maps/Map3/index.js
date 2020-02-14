@@ -240,7 +240,7 @@ const Maps3 = props => {
           <MapMarker
             point={point}
             key={point.entity_id}
-            openInfoModal={() => openInfoModal(point)}
+            openInfoModal={() => openInfoModal}
           />
         ))}
         <MapboxGL.UserLocation visible />
