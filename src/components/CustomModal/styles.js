@@ -12,7 +12,7 @@ const style = StyleSheet.create({
   },
 
   modalContainer: {
-    flex: 1,
+    // flex: 1,
     maxHeight: metrics.height / 1.5,
     width: metrics.width / 1.2,
     backgroundColor: colors.worSky.white,

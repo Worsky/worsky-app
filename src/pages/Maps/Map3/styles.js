@@ -144,20 +144,6 @@ const styles = StyleSheet.create({
     top: "50%",
     left: "50%",
     transform: [{ translateX: -32 }, { translateY: -32 }]
-  },
-
-  moreDetailButton: {
-    width: "100%",
-    alignContent: "center",
-    justifyContent: "center",
-    height: 40,
-    backgroundColor: colors.worSky.blue,
-    borderRadius: 8
-  },
-
-  moreDetailButtonText: {
-    color: colors.worSky.white,
-    textAlign: "center"
   }
 });
 

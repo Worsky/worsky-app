@@ -5,34 +5,26 @@ import PropTypes from "prop-types";
 
 import styles from "./styles";
 
-const MapMarker = ({ point, openInfoModal }) => {
-  // console.tron.log(openInfoModal);
-  // const handleAction = () => console.tron.log("a");
-
-  // console.tron.log(point);
-
-  return (
-    <MapboxGL.PointAnnotation
-      id={"post-" + point.entity_id}
-      coordinate={[Number(point.longitude), Number(point.latitude)]}
-      title={point.name}
-      snippet={point.description.substring(0, 35) + "... [Veja mais detalhes]"}
-      onSelected={() => console.tron.log(point)}
-    >
-      <View style={styles.annotationContainer}>
-        <Image
-          source={{
-            uri:
-              "https://worsky.s3.us-east-2.amazonaws.com/entities/Yx1Bt9zaE52SZKnHYAV0CujisODJTs60bHWss2Nq.png"
-          }}
-          resizeMode="cover"
-          style={styles.annotationFill}
-        />
-        <Text>{point.name}</Text>
-      </View>
-    </MapboxGL.PointAnnotation>
-  );
-};
+const MapMarker = ({ point, openInfoModal }) => (
+  <MapboxGL.PointAnnotation
+    id={"post-" + point.entity_id}
+    coordinate={[Number(point.longitude), Number(point.latitude)]}
+    title={point.name}
+    snippet={point.description.substring(0, 35) + "... [Veja mais detalhes]"}
+    onSelected={() => openInfoModal(point)}
+  >
+    <View style={styles.annotationContainer}>
+      <Image
+        source={{
+          uri: point.point_type.icon
+        }}
+        resizeMode="contain"
+        style={styles.annotationFill}
+      />
+      <Text>{point.name}</Text>
+    </View>
+  </MapboxGL.PointAnnotation>
+);
 
 MapMarker.propTypes = {
   point: PropTypes.shape({

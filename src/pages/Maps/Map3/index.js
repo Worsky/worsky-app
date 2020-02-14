@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, Image, TouchableOpacity, Text, Keyboard } from "react-native";
+import { View, Image, TouchableOpacity, Keyboard } from "react-native";
 import Icon from "react-native-vector-icons/FontAwesome";
 import MapboxGL from "@react-native-mapbox-gl/maps";
 import Geolocation from "@react-native-community/geolocation";
@@ -11,6 +11,7 @@ import CustomModal from "~/components/CustomModal";
 import MapNumberMarkers from "~/components/MapNumberMarkers";
 import MapFilterModalContent from "~/components/MapFilterModalContent";
 import MapMarker from "~/components/MapMarker";
+import MoreInfoModalContent from "~/components/MoreInfoModalContent";
 
 import { metrics } from "~/styles";
 import { plane } from "~/assets";
@@ -32,8 +33,24 @@ const Maps3 = props => {
   const [userPosition, setUserPosition] = useState({});
   const [filters, setFilters] = useState({ all: true });
   const [search, setSearch] = useState("");
-  const [infoPoint, setInfoPoint] = useState(null);
-  const [infoModalVisible, setInfoModalVisible] = useState(false);
+  const [infoPoint, setInfoPoint] = useState({
+    entity_id: 91,
+    point_type: {
+      point_type_id: 1,
+      name: "Reports",
+      entity: "reports",
+      icon:
+        "https://worsky.s3.us-east-2.amazonaws.com/entities/Yx1Bt9zaE52SZKnHYAV0CujisODJTs60bHWss2Nq.png"
+    },
+    image:
+      "https://www.diariodoiguacu.com.br/static/img/noticias/capa-seripa-investiga-as-causas-do-acidente-aereo-de-concordia--47872.png",
+    name: "Communication failure",
+    description: "Communication failure",
+    latitude: "-22.277153",
+    longitude: "-48.550993",
+    date: "1 month before"
+  });
+  const [infoModalVisible, setInfoModalVisible] = useState(true);
   const [filterModalVisible, setFilterModalVisible] = useState(false);
   const [follow, setFollow] = useState(true);
   const [compassHeading, setCompassHeading] = useState(0);
@@ -52,7 +69,6 @@ const Maps3 = props => {
   };
 
   const openInfoModal = point => {
-    console.tron.log("click");
     setInfoPoint(point);
     setInfoModalVisible(true);
     mapCenterOnPoint(point);
@@ -240,7 +256,7 @@ const Maps3 = props => {
           <MapMarker
             point={point}
             key={point.entity_id}
-            openInfoModal={() => openInfoModal}
+            openInfoModal={openInfoModal}
           />
         ))}
         <MapboxGL.UserLocation visible />
@@ -327,34 +343,13 @@ const Maps3 = props => {
           close={false}
           visible={infoModalVisible}
           changeVisibility={() => setInfoModalVisible(false)}
-          maxHeight={100}
+          // minHeight={50}
           content={
-            <>
-              <Text>{infoPoint.name}</Text>
-              <Text>{infoPoint.description}</Text>
-              <TouchableOpacity
-                style={[styles.moreDetailButton, { marginTop: 20 }]}
-                onPress={async () => {
-                  await setInfoModalVisible(false);
-                  setTimeout(() => {
-                    handleNavigation(infoPoint);
-                  }, 500);
-                }}
-              >
-                <Text style={styles.moreDetailButtonText}>More details</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[
-                  styles.moreDetailButton,
-                  { backgroundColor: "#ddd", marginTop: 8 }
-                ]}
-                onPress={() => setInfoModalVisible(false)}
-              >
-                <Text style={[styles.moreDetailButtonText, { color: "#333" }]}>
-                  Close
-                </Text>
-              </TouchableOpacity>
-            </>
+            <MoreInfoModalContent
+              infoPoint={infoPoint}
+              closeModal={setInfoModalVisible}
+              handleNavigation={handleNavigation}
+            />
           }
         />
       )}

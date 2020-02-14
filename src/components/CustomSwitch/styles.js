@@ -22,7 +22,8 @@ const styles = StyleSheet.create({
   checkboxField: {
     flex: 1,
     flexDirection: "row",
-    alignItems: "center"
+    alignItems: "center",
+    paddingVertical: 15
   },
 
   filterLabel: {
