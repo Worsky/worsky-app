@@ -33,24 +33,8 @@ const Maps3 = props => {
   const [userPosition, setUserPosition] = useState({});
   const [filters, setFilters] = useState({ all: true });
   const [search, setSearch] = useState("");
-  const [infoPoint, setInfoPoint] = useState({
-    entity_id: 91,
-    point_type: {
-      point_type_id: 1,
-      name: "Reports",
-      entity: "reports",
-      icon:
-        "https://worsky.s3.us-east-2.amazonaws.com/entities/Yx1Bt9zaE52SZKnHYAV0CujisODJTs60bHWss2Nq.png"
-    },
-    image:
-      "https://www.diariodoiguacu.com.br/static/img/noticias/capa-seripa-investiga-as-causas-do-acidente-aereo-de-concordia--47872.png",
-    name: "Communication failure",
-    description: "Communication failure",
-    latitude: "-22.277153",
-    longitude: "-48.550993",
-    date: "1 month before"
-  });
-  const [infoModalVisible, setInfoModalVisible] = useState(true);
+  const [infoPoint, setInfoPoint] = useState({});
+  const [infoModalVisible, setInfoModalVisible] = useState(false);
   const [filterModalVisible, setFilterModalVisible] = useState(false);
   const [follow, setFollow] = useState(true);
   const [compassHeading, setCompassHeading] = useState(0);
@@ -343,7 +327,6 @@ const Maps3 = props => {
           close={false}
           visible={infoModalVisible}
           changeVisibility={() => setInfoModalVisible(false)}
-          // minHeight={50}
           content={
             <MoreInfoModalContent
               infoPoint={infoPoint}

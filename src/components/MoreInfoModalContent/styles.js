@@ -3,19 +3,19 @@ import { colors, metrics } from "~/styles";
 
 const styles = StyleSheet.create({
   container: {
-    // flex: 1,
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: "white"
-    // height: 260
   },
 
   title: {
+    top: -10,
     fontSize: 15,
     fontWeight: "bold"
   },
 
   description: {
+    top: -10,
     fontSize: 16
   },
 

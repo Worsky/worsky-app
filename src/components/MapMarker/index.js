@@ -21,7 +21,6 @@ const MapMarker = ({ point, openInfoModal }) => (
         resizeMode="contain"
         style={styles.annotationFill}
       />
-      <Text>{point.name}</Text>
     </View>
   </MapboxGL.PointAnnotation>
 );
