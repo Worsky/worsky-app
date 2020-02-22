@@ -1,12 +1,5 @@
 import React from "react";
-import {
-  StyleSheet,
-  View,
-  Image,
-  Animated,
-  Easing,
-  AsyncStorage
-} from "react-native";
+import { StyleSheet, View, Image, Animated, Easing } from "react-native";
 import {
   createAppContainer,
   createStackNavigator,

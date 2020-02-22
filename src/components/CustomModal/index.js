@@ -9,14 +9,15 @@ import {
 } from "react-native";
 import PropTypes from "prop-types";
 
+import { metrics } from "~/styles";
+
 import styles from "./styles";
 
 const CustomModal = ({
   visible,
   changeVisibility,
   content,
-  minHeight = 230,
-  maxHeight = 5000,
+  minHeight = 10,
   close = true
 }) => {
   if (Platform.OS == "ios")
@@ -32,7 +33,7 @@ const CustomModal = ({
           behavior="padding"
           enabled
         >
-          <View style={[styles.modalContainer, { minHeight, maxHeight }]}>
+          <View style={[styles.modalContainer, { minHeight }]}>
             {content}
             {close ? (
               <View style={styles.closeContainer}>
@@ -80,8 +81,8 @@ CustomModal.propTypes = {
   changeVisibility: PropTypes.func.isRequired,
   content: PropTypes.any.isRequired,
   close: PropTypes.bool,
-  minHeight: PropTypes.number,
-  maxHeight: PropTypes.number
+  minHeight: PropTypes.number
+  // maxHeight: PropTypes.number
 };
 
 export default CustomModal;

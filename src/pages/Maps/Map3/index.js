@@ -1,27 +1,23 @@
-import React, { useState, useEffect, use } from "react";
-import {
-  View,
-  Platform,
-  Image,
-  TouchableOpacity,
-  Text,
-  Switch
-} from "react-native";
+import React, { useState, useEffect } from "react";
+import { View, Image, TouchableOpacity, Keyboard } from "react-native";
 import Icon from "react-native-vector-icons/FontAwesome";
-
-import { metrics } from "~/styles";
-import styles from "./styles";
-
 import MapboxGL from "@react-native-mapbox-gl/maps";
-import { plane } from "~/assets";
 import Geolocation from "@react-native-community/geolocation";
 import Autocomplete from "react-native-autocomplete-input";
+import CompassHeading from "react-native-compass-heading";
+
 import AutocompleteItem from "~/components/AutocompleteItem";
 import CustomModal from "~/components/CustomModal";
-import { throttle } from "lodash";
+import MapNumberMarkers from "~/components/MapNumberMarkers";
+import MapFilterModalContent from "~/components/MapFilterModalContent";
+import MapMarker from "~/components/MapMarker";
+import MoreInfoModalContent from "~/components/MoreInfoModalContent";
 
+import { metrics } from "~/styles";
+import { plane } from "~/assets";
+
+import styles from "./styles";
 import api from "./api";
-import CompassHeading from "react-native-compass-heading";
 
 MapboxGL.setAccessToken(
   "sk.eyJ1Ijoiam9lbGJhbnphdHRvIiwiYSI6ImNrNDk2cmkzNzAwdHkzZHMyY2x2ZGh0eXYifQ.EeAfcaGLuGKv0FV90GT27g"
@@ -34,155 +30,101 @@ const Maps3 = props => {
   const [mapLoaded, setMapLoaded] = useState(false);
   const [mapView, setMapView] = useState(null);
   const [mapCamera, setMapCamera] = useState(null);
-  const [mapCenter, setMapCenter] = useState(null);
-  const [geoObserver, setGeoObserver] = useState(null);
   const [userPosition, setUserPosition] = useState({});
   const [filters, setFilters] = useState({ all: true });
   const [search, setSearch] = useState("");
-  const [infoPoint, setInfoPoint] = useState(null);
+  const [infoPoint, setInfoPoint] = useState({});
   const [infoModalVisible, setInfoModalVisible] = useState(false);
   const [filterModalVisible, setFilterModalVisible] = useState(false);
   const [follow, setFollow] = useState(true);
-  const [magnetometer, setMagnetometer] = useState(0);
-  const [loadingSearch, setLoadingSearch] = useState(false);
   const [compassHeading, setCompassHeading] = useState(0);
 
   const handleSearch = async data => {
-    await setSearch(data);
-    await setResult([]);
+    setSearch(data);
+    setResult([]);
 
     if (search.length < 3) return;
 
     const [longitude, latitude] = await mapView.getCenter();
 
-    await setLoadingSearch(true);
-    api
-      .loadSearch(data, latitude, longitude)
-      .then(response => {
-        setResult(response.data.data);
-      })
-      .finally(() => {
-        setLoadingSearch(false);
-      });
+    const response = await api.loadSearch(data, latitude, longitude);
+
+    setResult(response.data.data);
   };
 
-  const openInfoModal = async point => {
-    await setInfoPoint(point);
-    await setInfoModalVisible(true);
+  const openInfoModal = point => {
+    setInfoPoint(point);
+    setInfoModalVisible(true);
     mapCenterOnPoint(point);
   };
 
   const handleMapPan = async () => {
-    if (mapLoaded) {
+    try {
+      if (!mapLoaded) return;
+
       const [[lng1, lat1], [lng2, lat2]] = await mapView.getVisibleBounds();
       const zoom = await mapView.getZoom();
 
-      let pointIds = "";
+      let pointIds = Object.keys(filters)
+        .filter(k => k !== "all" && filters[k] === true)
+        .map(key => key.replace("point", ""))
+        .join(",");
 
-      if (filters.all === true) {
+      if (filters.all === true)
         pointIds = Object.keys(filters)
           .filter(k => k !== "all")
-          .map(key => {
-            return key.replace("point", "");
-          })
+          .map(key => key.replace("point", ""))
           .join(",");
-      } else {
-        pointIds = Object.keys(filters)
-          .filter(k => k !== "all" && filters[k] === true)
-          .map(key => {
-            return key.replace("point", "");
-          })
-          .join(",");
-      }
 
-      api.loadPosts(lat1, lng1, lat2, lng2, zoom, pointIds).then(response => {
-        setPosts(response.data.data);
-      });
+      const apiResponse = await api.loadPosts(
+        lat1,
+        lng1,
+        lat2,
+        lng2,
+        zoom,
+        pointIds
+      );
+
+      setPosts(apiResponse.data.data);
+    } catch (error) {
+      return error;
     }
-  };
-
-  const renderAnnotation = point => {
-    return (
-      <MapboxGL.PointAnnotation
-        key={point.entity_id + Date()}
-        id={"post-" + point.entity_id}
-        coordinate={[Number(point.longitude), Number(point.latitude)]}
-        title={point.title}
-        snippet={
-          point.description.substring(0, 35) + "... [Veja mais detalhes]"
-        }
-        onSelected={() => {
-          openInfoModal(point);
-        }}
-      >
-        <View style={styles.annotationContainer}>
-          <Image
-            source={{
-              uri: point.point_type.icon
-            }}
-            resizeMode="contain"
-            style={styles.annotationFill}
-          />
-        </View>
-      </MapboxGL.PointAnnotation>
-    );
   };
 
   const centerMapOnMe = () => {
     const newCenter = [userPosition.longitude, userPosition.latitude];
-    const newFollow = !follow;
-    setFollow(newFollow);
 
-    if (newFollow) {
-      console.log({ mapCamera });
-      setMapCenter(newCenter);
-      mapCamera.flyTo(newCenter);
-    }
+    setFollow(false);
+
+    mapCamera.flyTo(newCenter);
   };
 
-  useEffect(() => {
-    if (Platform.OS === "ios") {
-      Geolocation.requestAuthorization();
-    } else {
-      // Geolocation.requestAndroidLocationPermissions();
-    }
-
-    const observer = Geolocation.watchPosition(
-      position => {
-        setUserPosition(position.coords);
-      },
-      error => {
-        Alert.alert(error.message);
-      },
+  const handleUserPosition = async () => {
+    Geolocation.watchPosition(
+      position => setUserPosition(position.coords),
+      error => Alert.alert(error.message),
       { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
     );
 
-    setGeoObserver(observer);
+    const { data: response } = await api.loadCategories();
+    setCategories(response.data);
 
-    api.loadCategories().then(response => {
-      setCategories(response.data.data);
-    });
+    if (CompassHeading)
+      CompassHeading.start(3, degree => {
+        setCompassHeading(degree);
+      });
+  };
 
-    const degree_update_rate = 3;
-    try {
-      if (CompassHeading) {
-        CompassHeading.start(degree_update_rate, degree => {
-          setCompassHeading(degree);
-        });
-      }
-    } catch (err) {
-      console.log({ err });
-    }
+  useEffect(() => {
+    handleUserPosition();
   }, []);
 
   useEffect(() => {
     handleMapPan();
-  }, [userPosition]);
+  }, [userPosition, filters]);
 
   useEffect(() => {
-    if (mapLoaded) {
-      handleMapPan();
-    }
+    if (mapLoaded) handleMapPan();
   }, [mapLoaded]);
 
   useEffect(() => {
@@ -228,122 +170,114 @@ const Maps3 = props => {
       : false;
   };
 
-  const mapCenterOnPoint = async point => {
+  const cleanSearchAndCenterMap = point => {
+    setSearch("");
+    setResult([]);
+    Keyboard.dismiss();
+    mapCenterOnPoint(point);
+  };
+
+  const mapCenterOnPoint = point => {
     if (!mapLoaded) return;
+
     const goToCoords = [
       Number(point.point_type.longitude || point.longitude),
       Number(point.point_type.latitude || point.latitude)
     ];
 
-    console.log({ goToCoords });
-
     if (mapCamera) {
-      await setFollow(false);
+      setFollow(false);
       mapCamera.flyTo(goToCoords);
     } else {
       handleNavigation(point);
     }
   };
 
-  const toggleFilter = async (id, value) => {
+  const toggleFilter = (id, value) => {
     let newFilters = JSON.parse(JSON.stringify(filters));
+
     if (id === "all") {
       newFilters.all = value;
-      for (cat of categories) {
-        newFilters[`point${cat.point_type_id}`] = value;
-      }
+
+      for (cat of categories) newFilters[`point${cat.point_type_id}`] = value;
     } else {
       newFilters[`point${id}`] = value;
 
       const keys = Object.keys(newFilters).filter(k => k !== "all");
-      if (keys.map(k => newFilters[k]).includes(false)) {
-        newFilters.all = false;
-      } else {
-        newFilters.all = true;
-      }
+
+      newFilters.all = true;
+
+      if (keys.map(k => newFilters[k]).includes(false)) newFilters.all = false;
     }
 
-    console.log({ newFilters });
-    await setFilters(newFilters);
-    setTimeout(handleMapPan, 500);
+    setFilters(newFilters);
   };
 
-  const cleanField = async () => {
-    await setResult([]);
-    await setSearch("");
+  const cleanField = () => {
+    setResult([]);
+    setSearch("");
   };
 
   return (
     <View style={styles.container}>
-      {userPosition && (
-        <MapboxGL.MapView
-          style={{ flex: 1 }}
-          onDidFinishLoadingMap={() => {
-            setMapLoaded(true);
-          }}
-          rotateEnabled={false}
-          compassEnabled
-          animated
-          ref={setMapView}
-          showUserLocation
-          styleURL={MapboxGL.StyleURL.Light}
-          logoEnabled={false}
-          compassEnabled={true}
-          onRegionDidChange={handleMapPan}
-        >
-          {posts.map(renderAnnotation)}
-          <MapboxGL.UserLocation visible />
-          <MapboxGL.Camera
-            zoomLevel={12}
-            followHeading={1}
-            followUserLocation={follow}
-            followUserMode={follow ? "course" : "normal"}
-            ref={setMapCamera}
+      <MapboxGL.MapView
+        style={{ flex: 1 }}
+        onDidFinishLoadingMap={() => {
+          setMapLoaded(true);
+          setFollow(false);
+        }}
+        rotateEnabled={false}
+        compassEnabled
+        animated
+        ref={setMapView}
+        showUserLocation
+        styleURL={MapboxGL.StyleURL.Light}
+        logoEnabled={false}
+        compassEnabled={true}
+        onRegionDidChange={handleMapPan}
+      >
+        {posts.map(point => (
+          <MapMarker
+            point={point}
+            key={point.entity_id}
+            openInfoModal={openInfoModal}
           />
-        </MapboxGL.MapView>
-      )}
-      {userPosition && (
-        <>
-          <Image
-            source={plane}
-            style={styles.planeOnMap}
-            height={64}
-            width={64}
-          />
-          <TouchableOpacity
-            style={styles.myPositionButton}
-            onPress={centerMapOnMe}
-          >
-            <Icon
-              name="crosshairs"
-              size={22}
-              color={follow ? "black" : "#bbb"}
-            />
-          </TouchableOpacity>
-          <View style={styles.instruments}>
-            <Text style={styles.instrumentItem}>
-              {Math.round(
-                (userPosition.speed < 0 ? 0 : userPosition.speed) * 1.94384
-              )}{" "}
-              kt
-            </Text>
-            {/* <Text style={styles.instrumentItem}>
-              {Math.round(magnetometer || 0)}º
-            </Text> */}
-            <Text style={styles.instrumentItem}>
-              {Math.round(compassHeading || 0)}º
-            </Text>
-            <Text style={styles.instrumentItem}>
-              {Math.round(userPosition.altitude * 3.28084)} ft
-            </Text>
-          </View>
-        </>
-      )}
+        ))}
+        <MapboxGL.UserLocation visible />
+        <MapboxGL.Camera
+          zoomLevel={12}
+          followHeading={1}
+          followUserLocation={follow}
+          followUserMode={follow ? "course" : "normal"}
+          ref={setMapCamera}
+        />
+      </MapboxGL.MapView>
+
+      <Image source={plane} style={styles.planeOnMap} height={64} width={64} />
+
+      <TouchableOpacity style={styles.myPositionButton} onPress={centerMapOnMe}>
+        <Icon name="crosshairs" size={22} color={"black"} />
+      </TouchableOpacity>
+
+      <View style={styles.instruments}>
+        <MapNumberMarkers
+          text={`${Math.round(
+            (userPosition.speed < 0 ? 0 : userPosition.speed) * 1.94384
+          )}${" "}
+              kt`}
+        />
+
+        <MapNumberMarkers text={`${Math.round(compassHeading || 0)}º`} />
+
+        <MapNumberMarkers
+          text={`${Math.round(userPosition.altitude * 3.28084)} ft`}
+        />
+      </View>
 
       <View style={styles.searchContainer}>
         <Autocomplete
           data={result}
-          onChangeText={throttle(handleSearch, 600)}
+          onChangeText={text => handleSearch(text)}
           clearButtonMode="while-editing"
           value={search}
           style={styles.autocomplete}
@@ -351,7 +285,7 @@ const Maps3 = props => {
           renderItem={({ item }) => (
             <AutocompleteItem
               item={item}
-              handleClick={mapCenterOnPoint}
+              handleClick={cleanSearchAndCenterMap}
               cleanField={cleanField}
             />
           )}
@@ -364,44 +298,25 @@ const Maps3 = props => {
           inputContainerStyle={{ borderColor: "white" }}
           keyboardShouldPersistTaps="always"
         />
+        {result.length == 0 && (
+          <TouchableOpacity
+            style={styles.filterIconContainer}
+            onPress={() => setFilterModalVisible(true)}
+          >
+            <Icon name="filter" style={styles.filterIcon} size={24} />
+          </TouchableOpacity>
+        )}
 
-        <TouchableOpacity
-          style={styles.filterIconContainer}
-          onPress={() => setFilterModalVisible(true)}
-        >
-          <Icon name="filter" style={styles.filterIcon} size={24} />
-        </TouchableOpacity>
         <CustomModal
           visible={filterModalVisible}
           changeVisibility={() => setFilterModalVisible(false)}
           maxHeight={540}
           content={
-            <View style={styles.checkboxForm}>
-              <Text>Show on map these point types: </Text>
-              <View style={styles.checkboxField}>
-                <Switch
-                  value={filters.all}
-                  onValueChange={value => toggleFilter("all", value)}
-                />
-                <Text style={styles.filterLabel}>All types</Text>
-              </View>
-              {categories.map((item, index) => (
-                <View key={`category${index}`} style={styles.checkboxField}>
-                  <Switch
-                    value={
-                      filters[`point${item.point_type_id}`] == null ||
-                      filters[`point${item.point_type_id}`] == undefined
-                        ? true
-                        : filters[`point${item.point_type_id}`]
-                    }
-                    onValueChange={value =>
-                      toggleFilter(item.point_type_id, value)
-                    }
-                  />
-                  <Text style={styles.filterLabel}>{item.name}</Text>
-                </View>
-              ))}
-            </View>
+            <MapFilterModalContent
+              filters={filters}
+              categories={categories}
+              toggleFilter={toggleFilter}
+            />
           }
           close={true}
         />
@@ -412,34 +327,12 @@ const Maps3 = props => {
           close={false}
           visible={infoModalVisible}
           changeVisibility={() => setInfoModalVisible(false)}
-          maxHeight={100}
           content={
-            <>
-              <Text>{infoPoint.name}</Text>
-              <Text>{infoPoint.description}</Text>
-              <TouchableOpacity
-                style={[styles.moreDetailButton, { marginTop: 20 }]}
-                onPress={async () => {
-                  await setInfoModalVisible(false);
-                  setTimeout(() => {
-                    handleNavigation(infoPoint);
-                  }, 500);
-                }}
-              >
-                <Text style={styles.moreDetailButtonText}>More details</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[
-                  styles.moreDetailButton,
-                  { backgroundColor: "#ddd", marginTop: 8 }
-                ]}
-                onPress={() => setInfoModalVisible(false)}
-              >
-                <Text style={[styles.moreDetailButtonText, { color: "#333" }]}>
-                  Close
-                </Text>
-              </TouchableOpacity>
-            </>
+            <MoreInfoModalContent
+              infoPoint={infoPoint}
+              closeModal={setInfoModalVisible}
+              handleNavigation={handleNavigation}
+            />
           }
         />
       )}

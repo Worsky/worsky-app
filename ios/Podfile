@@ -64,6 +64,8 @@ target 'worSky' do
 
     pod 'RNScreens', :path => '../node_modules/react-native-screens'
 
+    pod 'RNCAsyncStorage', :path => '../node_modules/@react-native-community/async-storage'
+
   end
 
   target 'worskyTests' do
