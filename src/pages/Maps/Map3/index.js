@@ -91,12 +91,18 @@ const Maps3 = props => {
     }
   };
 
-  const centerMapOnMe = () => {
-    const newCenter = [userPosition.longitude, userPosition.latitude];
+  const centerMapOnMe = async () => {
+    try {
+      const newCenter = [userPosition.longitude, userPosition.latitude];
 
-    setFollow(false);
+      if (follow) setFollow(false);
 
-    mapCamera.flyTo(newCenter);
+      await mapCamera.flyTo(newCenter);
+
+      setFollow(true);
+    } catch (error) {
+      setFollow(true);
+    }
   };
 
   const handleUserPosition = async () => {
@@ -221,19 +227,18 @@ const Maps3 = props => {
   return (
     <View style={styles.container}>
       <MapboxGL.MapView
-        style={{ flex: 1 }}
-        onDidFinishLoadingMap={() => {
-          setMapLoaded(true);
-          setFollow(false);
-        }}
-        rotateEnabled={false}
+        rotateEnabled
         compassEnabled
         animated
-        ref={setMapView}
         showUserLocation
+        style={{ flex: 1 }}
+        ref={setMapView}
         styleURL={MapboxGL.StyleURL.Light}
         logoEnabled={false}
-        compassEnabled={true}
+        onDidFinishLoadingMap={() => {
+          setMapLoaded(true);
+          setFollow(true);
+        }}
         onRegionDidChange={handleMapPan}
       >
         {posts.map(point => (
@@ -246,9 +251,9 @@ const Maps3 = props => {
         <MapboxGL.UserLocation visible />
         <MapboxGL.Camera
           zoomLevel={12}
-          followHeading={1}
           followUserLocation={follow}
-          followUserMode={follow ? "course" : "normal"}
+          followUserMode={follow ? "normal" : "compass"}
+          followHeading={1}
           ref={setMapCamera}
         />
       </MapboxGL.MapView>
