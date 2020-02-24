@@ -1,29 +1,38 @@
 import React from "react";
-import { View, Image, TouchableOpacity, Text } from "react-native";
 import MapboxGL from "@react-native-mapbox-gl/maps";
 import PropTypes from "prop-types";
 
-import styles from "./styles";
+const MapMarker = ({ point, openInfoModal }) => {
+  const buildFeatureCollection = {
+    type: "Feature",
+    geometry: {
+      type: "Point",
+      coordinates: [Number(point.longitude), Number(point.latitude)]
+    }
+  };
 
-const MapMarker = ({ point, openInfoModal }) => (
-  <MapboxGL.PointAnnotation
-    id={"post-" + point.entity_id}
-    coordinate={[Number(point.longitude), Number(point.latitude)]}
-    title={point.name}
-    snippet={point.description.substring(0, 35) + "... [Veja mais detalhes]"}
-    onSelected={() => openInfoModal(point)}
-  >
-    <View style={styles.annotationContainer}>
-      <Image
-        source={{
-          uri: point.point_type.icon
-        }}
-        resizeMode="contain"
-        style={styles.annotationFill}
-      />
-    </View>
-  </MapboxGL.PointAnnotation>
-);
+  const layerStyles = {
+    pin: {
+      iconImage: point.point_type.icon,
+      iconSize: 0.08,
+      iconOpacity: 1,
+      iconAllowOverlap: true,
+      iconIgnorePlacement: true,
+      symbolSpacing: 350
+    }
+  };
+
+  return (
+    <MapboxGL.ShapeSource
+      id="symbolLocationSource"
+      hitbox={{ width: 30, height: 30 }}
+      shape={buildFeatureCollection}
+      onPress={() => openInfoModal(point)}
+    >
+      <MapboxGL.SymbolLayer id="pin" style={layerStyles.pin} />
+    </MapboxGL.ShapeSource>
+  );
+};
 
 MapMarker.propTypes = {
   point: PropTypes.shape({
