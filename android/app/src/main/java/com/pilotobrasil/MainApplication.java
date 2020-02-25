@@ -3,6 +3,11 @@ package com.pilotobrasil;
 import android.app.Application;
 
 import com.facebook.react.ReactApplication;
+import org.reactnative.camera.RNCameraPackage;
+import com.th3rdwave.safeareacontext.SafeAreaContextPackage;
+import org.reactnative.maskedview.RNCMaskedViewPackage;
+import com.reactnativecommunity.cameraroll.CameraRollPackage;
+import com.reactnativecommunity.imageeditor.ImageEditorPackage;
 import com.reactnativecommunity.asyncstorage.AsyncStoragePackage;
 import com.swmansion.rnscreens.RNScreensPackage;
 import com.reactlibrary.CompassHeadingPackage;
@@ -40,6 +45,11 @@ public class MainApplication extends Application implements ReactApplication {
     @Override
     protected List<ReactPackage> getPackages() {
       return Arrays.<ReactPackage>asList(new MainReactPackage(),
+            new RNCameraPackage(),
+            new SafeAreaContextPackage(),
+            new RNCMaskedViewPackage(),
+            new CameraRollPackage(),
+            new ImageEditorPackage(),
             new AsyncStoragePackage(),
             new RNScreensPackage(), new CompassHeadingPackage(),
           new ReactNativeOneSignalPackage(), new GeolocationPackage(), new RNCWebViewPackage(),

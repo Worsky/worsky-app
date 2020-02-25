@@ -194,7 +194,7 @@ class Publish extends Component {
     } else if (entity_id == null) {
       return (
         <TouchableOpacity
-          onPress={() => {}}
+          onPress={() => { }}
           style={styles.publishButtomDisabled}
           activeOpacity={1}
         >
@@ -298,22 +298,22 @@ class Publish extends Component {
               style={
                 preview
                   ? [
-                      styles.imagePost,
-                      { resizeMode: "contain", opacity: loadMedia ? 0.5 : 1 }
-                    ]
+                    styles.imagePost,
+                    { resizeMode: "contain", opacity: loadMedia ? 0.5 : 1 }
+                  ]
                   : styles.uploadIcon
               }
             />
           ) : (
-            <Video
-              source={preview}
-              style={[styles.imagePost, { marginTop: 10 }]}
-              volume={mute ? 1.0 : 0.0}
-              posterResizeMode="center"
-              repeat={true}
-              resizeMode="contain"
-            />
-          )}
+              <Video
+                source={preview}
+                style={[styles.imagePost, { marginTop: 10 }]}
+                volume={mute ? 1.0 : 0.0}
+                posterResizeMode="center"
+                repeat={true}
+                resizeMode="contain"
+              />
+            )}
           {loadMedia ? (
             <ActivityIndicator
               size="large"
@@ -335,8 +335,8 @@ class Publish extends Component {
             {mute ? (
               <Icon name="volume-up" size={20} />
             ) : (
-              <Icon name="volume-mute" size={20} />
-            )}
+                <Icon name="volume-mute" size={20} />
+              )}
           </TouchableOpacity>
         ) : null}
         <Text style={styles.descriptionTitle}>Description:</Text>

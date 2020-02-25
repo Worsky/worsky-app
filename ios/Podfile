@@ -66,6 +66,16 @@ target 'worSky' do
 
     pod 'RNCAsyncStorage', :path => '../node_modules/@react-native-community/async-storage'
 
+    pod 'react-native-image-editor', :path => '../node_modules/@react-native-community/image-editor'
+
+    pod 'react-native-cameraroll', :path => '../node_modules/@react-native-community/cameraroll'
+
+    pod 'RNCMaskedView', :path => '../node_modules/@react-native-community/masked-view'
+
+    pod 'react-native-safe-area-context', :path => '../node_modules/react-native-safe-area-context'
+
+    pod 'react-native-camera', :path => '../node_modules/react-native-camera'
+
   end
 
   target 'worskyTests' do
