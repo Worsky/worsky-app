@@ -12,7 +12,8 @@ const MapMarker = ({ posts, openInfoModal }) => {
         coordinates: [Number(post.longitude), Number(post.latitude)]
       },
       properties: {
-        icon: post.point_type.name
+        icon: post.point_type.name,
+        post
       }
     }))
   };
@@ -45,7 +46,9 @@ const MapMarker = ({ posts, openInfoModal }) => {
         id="symbolLocationSource"
         hitbox={{ width: 30, height: 30 }}
         shape={buildFeatureCollection}
-        onPress={() => openInfoModal(posts)}
+        onPress={({ nativeEvent }) =>
+          openInfoModal(nativeEvent.payload.properties.post)
+        }
       >
         <MapboxGL.SymbolLayer id="pin" style={layerStyle} />
       </MapboxGL.ShapeSource>
