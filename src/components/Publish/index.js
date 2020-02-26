@@ -69,7 +69,6 @@ class Publish extends Component {
     this.setState({ mapView: value })
   }
   handleFunction = () => {
-    console.log('aaaaaa');
 
     Alert.alert(
       'Publish',
@@ -147,13 +146,22 @@ class Publish extends Component {
   };
 
   async componentWillMount() {
+    const { navigation } = this.props;
+    const { state: { params } } = navigation;
+
+    this.setState({
+      image: params.response,
+      preview: { uri: params.response.uri },
+      mediaType: params.mediaType
+    })
+
     const { loadReportTypes } = this.props;
 
     await loadReportTypes();
   }
 
   render() {
-    const { follow, } = this.state
+    const { follow, description } = this.state
     const { navigation, reportTypes } = this.props;
     const { state: { params } } = navigation;
 
@@ -166,11 +174,13 @@ class Publish extends Component {
         />
         <View style={styles.inputsContainer}>
           <View style={styles.inputView}>
-            {params && <Image source={{ uri: params.response }} style={styles.imagePreviewContainer} />}
+            {params && <Image source={{ uri: params.response.uri }} style={styles.imagePreviewContainer} />}
             <TextInput
               style={styles.input}
               placeholder="Write a thing..."
               multiline={true}
+              onChangeText={description => this.setState({ description })}
+              value={description}
             >
             </TextInput>
           </View>
@@ -235,14 +245,15 @@ Publish.navigationOptions = {
   tabBarIcon: ({ tintColor }) => <Icon name="publish" size={20} color={tintColor} />
 }
 
-const mapStateToProps = state => ({
-  reportTypes: state.publish.reportTypes,
-  clear: state.publish.clear,
-  uri: state.publish.uri,
-  loadButton: state.publish.loadButton,
-  mute: state.publish.mute,
-  loadMedia: state.publish.loadMedia
-});
+const mapStateToProps = state => (console.log(state),
+  {
+    reportTypes: state.publish.reportTypes,
+    clear: state.publish.clear,
+    uri: state.publish.uri,
+    loadButton: state.publish.loadButton,
+    mute: state.publish.mute,
+    loadMedia: state.publish.loadMedia
+  });
 
 const mapDispatchToProps = dispatch =>
   bindActionCreators(PublishActions, dispatch);

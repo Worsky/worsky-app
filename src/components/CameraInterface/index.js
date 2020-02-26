@@ -60,13 +60,16 @@ export default class CameraInterface extends Component {
 
       const response = await this.recordVideo();
 
-      navigation.navigate('PublishPreview', { response: response.uri });
+      navigation.navigate('PublishPreview', { response, mediaType: "video" });
     }
-    const response = await this.takePhoto(camera);
 
-    // await CameraRoll.saveToCameraRoll(response.uri)
+    if (only == "photo") {
+      const response = await this.takePhoto(camera);
 
-    navigation.navigate('PublishPreview', { response: response.uri });
+      // await CameraRoll.saveToCameraRoll(response.uri)
+
+      navigation.navigate('PublishPreview', { response, mediaType: "photo" });
+    }
   };
 
   changeCamera = () => {

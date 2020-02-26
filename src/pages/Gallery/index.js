@@ -63,11 +63,16 @@ export default class Gallery extends Component {
   };
 
   handleFunction = async () => {
+    const { current } = this.state;
     const { navigation } = this.props;
 
-    const response = await this.handleCrop();
+    const mediaType = current.type === "video/mp4" ? "video" : "photo";
 
-    navigation.navigate('Publish', { response });
+    let response = current.type === "video/mp4" ? current : await this.handleCrop();
+
+    response = { ...current, uri: current.type === "video/mp4" ? current.uri : response };
+
+    navigation.navigate('Publish', { response, mediaType });
   }
 
   handleBack = () => {

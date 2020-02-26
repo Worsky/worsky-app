@@ -6,15 +6,15 @@ import styles from "./styles";
 export default function PublishPreview({ navigation }) {
   const { state: { params } } = navigation;
 
-  handleFunction = (navigation) => {
+  handleFunction = navigation => {
     const { state: { params } } = navigation;
 
-    navigation.navigate('Publish', { response: params.response });
+    navigation.navigate('Publish', { response: params.response, mediaType: params.mediaType });
   }
 
   return (
     <View style={styles.viewPreview} >
-      <Image source={{ uri: params.response }} style={styles.preview} />
+      <Image source={{ uri: params.response.uri }} style={styles.preview} />
     </View>
   );
 }

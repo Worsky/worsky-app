@@ -90,9 +90,7 @@ const feedTabNavigator = createBottomTabNavigator(
       screen: createStackNavigator(
         {
           Photo,
-          PublishPreview: {
-            screen: PublishPreview,
-          },
+          PublishPreview
         },
         {
           defaultNavigationOptions: {
@@ -117,7 +115,32 @@ const feedTabNavigator = createBottomTabNavigator(
       },
     },
     Video: {
-      screen: Video
+      screen: createStackNavigator(
+        {
+          Video,
+          PublishPreview
+        },
+        {
+          defaultNavigationOptions: {
+            headerTransparent: true,
+            headerRightContainerStyle: {
+              marginRight: 10,
+            },
+          },
+        }
+      ),
+      navigationOptions: () => {
+        return {
+          tabBarVisible: true,
+          tabBarIcon: () => (
+            <Icon
+              name="videocam"
+              size={20}
+              color="#000"
+            />
+          ),
+        }
+      },
     },
     Publish: {
       screen: Publish
@@ -176,16 +199,16 @@ const tabNavigator = createBottomTabNavigator(
         )
       }
     },
-    // Publish2: {
-    //   screen: Publish2,
-    //   navigationOptions: {
-    //     tabBarIcon: () => (
-    //       <View style={styles.profileIcon}>
-    //         <Image source={publish} style={styles.publishIconMenu} />
-    //       </View>
-    //     )
-    //   }
-    // },
+    Publish2: {
+      screen: Publish2,
+      navigationOptions: {
+        tabBarIcon: () => (
+          <View style={styles.profileIcon}>
+            <Image source={publish} style={styles.publishIconMenu} />
+          </View>
+        )
+      }
+    },
     Notifications: {
       screen: Notifications,
       navigationOptions: {
