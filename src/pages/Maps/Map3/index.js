@@ -91,12 +91,18 @@ const Maps3 = props => {
     }
   };
 
-  const centerMapOnMe = () => {
-    const newCenter = [userPosition.longitude, userPosition.latitude];
+  const centerMapOnMe = async () => {
+    try {
+      const newCenter = [userPosition.longitude, userPosition.latitude];
 
-    setFollow(false);
+      if (follow) setFollow(false);
 
-    mapCamera.flyTo(newCenter);
+      await mapCamera.flyTo(newCenter);
+
+      setFollow(true);
+    } catch (error) {
+      setFollow(true);
+    }
   };
 
   const handleUserPosition = async () => {
@@ -177,19 +183,24 @@ const Maps3 = props => {
     mapCenterOnPoint(point);
   };
 
-  const mapCenterOnPoint = point => {
-    if (!mapLoaded) return;
+  const mapCenterOnPoint = async point => {
+    try {
+      if (!mapLoaded) return;
 
-    const goToCoords = [
-      Number(point.point_type.longitude || point.longitude),
-      Number(point.point_type.latitude || point.latitude)
-    ];
+      const goToCoords = [
+        Number(point.point_type.longitude || point.longitude),
+        Number(point.point_type.latitude || point.latitude)
+      ];
 
-    if (mapCamera) {
-      setFollow(false);
-      mapCamera.flyTo(goToCoords);
-    } else {
-      handleNavigation(point);
+      if (mapCamera) {
+        await setFollow(false);
+
+        await mapCamera.flyTo(goToCoords);
+      } else {
+        handleNavigation(point);
+      }
+    } catch (error) {
+      return error;
     }
   };
 
@@ -221,34 +232,25 @@ const Maps3 = props => {
   return (
     <View style={styles.container}>
       <MapboxGL.MapView
+        rotateEnabled={true}
+        showUserLocation={false}
         style={{ flex: 1 }}
-        onDidFinishLoadingMap={() => {
-          setMapLoaded(true);
-          setFollow(false);
-        }}
-        rotateEnabled={false}
-        compassEnabled
-        animated
         ref={setMapView}
-        showUserLocation
         styleURL={MapboxGL.StyleURL.Light}
         logoEnabled={false}
-        compassEnabled={true}
+        onDidFinishLoadingMap={() => {
+          setMapLoaded(true);
+        }}
+        onPress={cleanSearchAndCenterMap}
         onRegionDidChange={handleMapPan}
       >
-        {posts.map(point => (
-          <MapMarker
-            point={point}
-            key={point.entity_id}
-            openInfoModal={openInfoModal}
-          />
-        ))}
+        <MapMarker posts={posts} openInfoModal={openInfoModal} />
         <MapboxGL.UserLocation visible />
         <MapboxGL.Camera
           zoomLevel={12}
-          followHeading={1}
           followUserLocation={follow}
           followUserMode={follow ? "course" : "normal"}
+          followHeading={1}
           ref={setMapCamera}
         />
       </MapboxGL.MapView>
