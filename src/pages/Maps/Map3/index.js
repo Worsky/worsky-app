@@ -183,7 +183,9 @@ const Maps3 = props => {
     mapCenterOnPoint(point);
   };
 
-  const mapCenterOnPoint = point => {
+  console.tron.log(follow);
+
+  const mapCenterOnPoint = async point => {
     if (!mapLoaded) return;
 
     const goToCoords = [
@@ -192,8 +194,9 @@ const Maps3 = props => {
     ];
 
     if (mapCamera) {
-      setFollow(false);
-      mapCamera.flyTo(goToCoords);
+      await setFollow(false);
+
+      await mapCamera.flyTo(goToCoords);
     } else {
       handleNavigation(point);
     }
@@ -227,17 +230,14 @@ const Maps3 = props => {
   return (
     <View style={styles.container}>
       <MapboxGL.MapView
-        rotateEnabled
-        compassEnabled
-        animated
-        showUserLocation
+        rotateEnabled={true}
+        showUserLocation={false}
         style={{ flex: 1 }}
         ref={setMapView}
         styleURL={MapboxGL.StyleURL.Light}
         logoEnabled={false}
         onDidFinishLoadingMap={() => {
           setMapLoaded(true);
-          setFollow(true);
         }}
         onRegionDidChange={handleMapPan}
       >
@@ -246,7 +246,7 @@ const Maps3 = props => {
         <MapboxGL.Camera
           zoomLevel={12}
           followUserLocation={follow}
-          followUserMode={follow ? "normal" : "compass"}
+          followUserMode="compass"
           followHeading={1}
           ref={setMapCamera}
         />
