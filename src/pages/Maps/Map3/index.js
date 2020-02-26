@@ -183,22 +183,24 @@ const Maps3 = props => {
     mapCenterOnPoint(point);
   };
 
-  console.tron.log(follow);
-
   const mapCenterOnPoint = async point => {
-    if (!mapLoaded) return;
+    try {
+      if (!mapLoaded) return;
 
-    const goToCoords = [
-      Number(point.point_type.longitude || point.longitude),
-      Number(point.point_type.latitude || point.latitude)
-    ];
+      const goToCoords = [
+        Number(point.point_type.longitude || point.longitude),
+        Number(point.point_type.latitude || point.latitude)
+      ];
 
-    if (mapCamera) {
-      await setFollow(false);
+      if (mapCamera) {
+        await setFollow(false);
 
-      await mapCamera.flyTo(goToCoords);
-    } else {
-      handleNavigation(point);
+        await mapCamera.flyTo(goToCoords);
+      } else {
+        handleNavigation(point);
+      }
+    } catch (error) {
+      return error;
     }
   };
 
@@ -239,6 +241,7 @@ const Maps3 = props => {
         onDidFinishLoadingMap={() => {
           setMapLoaded(true);
         }}
+        onPress={cleanSearchAndCenterMap}
         onRegionDidChange={handleMapPan}
       >
         <MapMarker posts={posts} openInfoModal={openInfoModal} />
@@ -246,7 +249,7 @@ const Maps3 = props => {
         <MapboxGL.Camera
           zoomLevel={12}
           followUserLocation={follow}
-          followUserMode="compass"
+          followUserMode={follow ? "course" : "normal"}
           followHeading={1}
           ref={setMapCamera}
         />
