@@ -2,47 +2,59 @@ import React from "react";
 import MapboxGL from "@react-native-mapbox-gl/maps";
 import PropTypes from "prop-types";
 
-const MapMarker = ({ point, openInfoModal }) => {
+const MapMarker = ({ posts, openInfoModal }) => {
   const buildFeatureCollection = {
-    type: "Feature",
-    geometry: {
-      type: "Point",
-      coordinates: [Number(point.longitude), Number(point.latitude)]
-    }
+    type: "FeatureCollection",
+    features: posts.map(post => ({
+      type: "Feature",
+      geometry: {
+        type: "Point",
+        coordinates: [Number(post.longitude), Number(post.latitude)]
+      },
+      properties: {
+        icon: post.point_type.name
+      }
+    }))
   };
 
-  const layerStyles = {
-    pin: {
-      iconImage: point.point_type.icon,
-      iconSize: 0.08,
-      iconOpacity: 1,
-      iconAllowOverlap: true,
-      iconIgnorePlacement: true,
-      symbolSpacing: 350
+  const orderCategories = posts.map(({ point_type }) => ({
+    [point_type.name]: {
+      uri: point_type.icon
     }
+  }));
+
+  let reorderCategories = {};
+
+  orderCategories.map(
+    category => (reorderCategories = { ...reorderCategories, ...category })
+  );
+
+  const layerStyle = {
+    iconImage: ["get", "icon"],
+    iconSize: 0.06,
+    iconOpacity: 1,
+    iconAllowOverlap: true,
+    iconIgnorePlacement: true,
+    symbolSpacing: 350
   };
 
   return (
-    <MapboxGL.ShapeSource
-      id="symbolLocationSource"
-      hitbox={{ width: 30, height: 30 }}
-      shape={buildFeatureCollection}
-      onPress={() => openInfoModal(point)}
-    >
-      <MapboxGL.SymbolLayer id="pin" style={layerStyles.pin} />
-    </MapboxGL.ShapeSource>
+    <>
+      <MapboxGL.Images images={{ ...reorderCategories, assets: ["pin"] }} />
+      <MapboxGL.ShapeSource
+        id="symbolLocationSource"
+        hitbox={{ width: 30, height: 30 }}
+        shape={buildFeatureCollection}
+        onPress={() => openInfoModal(posts)}
+      >
+        <MapboxGL.SymbolLayer id="pin" style={layerStyle} />
+      </MapboxGL.ShapeSource>
+    </>
   );
 };
 
 MapMarker.propTypes = {
-  point: PropTypes.shape({
-    entity_id: PropTypes.number.isRequired,
-    longitude: PropTypes.string.isRequired,
-    latitude: PropTypes.string.isRequired,
-    title: PropTypes.string,
-    description: PropTypes.string.isRequired,
-    point_type: PropTypes.object.isRequired
-  }).isRequired,
+  posts: PropTypes.array.isRequired,
   openInfoModal: PropTypes.func.isRequired
 };
 
