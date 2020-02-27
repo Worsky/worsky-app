@@ -37,6 +37,7 @@ const Maps3 = props => {
   const [infoModalVisible, setInfoModalVisible] = useState(false);
   const [filterModalVisible, setFilterModalVisible] = useState(false);
   const [follow, setFollow] = useState(true);
+  const [followUserMode, setFollowUserMode] = useState("normal");
   const [compassHeading, setCompassHeading] = useState(0);
 
   const handleSearch = async data => {
@@ -245,11 +246,11 @@ const Maps3 = props => {
         onRegionDidChange={handleMapPan}
       >
         <MapMarker posts={posts} openInfoModal={openInfoModal} />
-        <MapboxGL.UserLocation visible />
+        <MapboxGL.UserLocation visible animated />
         <MapboxGL.Camera
           zoomLevel={12}
           followUserLocation={follow}
-          followUserMode={follow ? "course" : "normal"}
+          followUserMode={followUserMode}
           followHeading={1}
           ref={setMapCamera}
         />
@@ -263,15 +264,20 @@ const Maps3 = props => {
 
       <View style={styles.instruments}>
         <MapNumberMarkers
+          onPress={() => setFollowUserMode("normal")}
           text={`${Math.round(
             (userPosition.speed < 0 ? 0 : userPosition.speed) * 1.94384
           )}${" "}
               kt`}
         />
 
-        <MapNumberMarkers text={`${Math.round(compassHeading || 0)}º`} />
+        <MapNumberMarkers
+          onPress={() => setFollowUserMode("compass")}
+          text={`${Math.round(compassHeading || 0)}º`}
+        />
 
         <MapNumberMarkers
+          onPress={() => setFollowUserMode("course")}
           text={`${Math.round(userPosition.altitude * 3.28084)} ft`}
         />
       </View>
