@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { View, TouchableOpacity, CameraRoll } from "react-native";
+import { View, TouchableOpacity, Text } from "react-native";
 import { RNCamera } from "react-native-camera";
 import Icon from "react-native-vector-icons/FontAwesome5";
 
@@ -11,7 +11,7 @@ export default class CameraInterface extends Component {
   state = {
     camera: "back",
     flash: "off",
-    recording: false
+    recording: false,
   };
 
   recordVideo = async () => {

@@ -107,9 +107,17 @@ class Publish extends Component {
     const { reportTypes } = this.props;
 
     if (entity_id === null) {
+      // return (
+      //   <View style={styles.pickerFieldContainer}>
+      //     <Text style={styles.pickerFieldText}>Categories</Text>
+      //     <View style={styles.pickerFieldIconContainer}>
+      //       <IconAw name="chevron-down" style={styles.pickerFieldIcon} />
+      //     </View>
+      //   </View>
+      // );
       return (
         <View style={styles.pickerFieldContainer}>
-          <Text style={styles.pickerFieldText}>Categories</Text>
+          <Text>Categories</Text>
           <View style={styles.pickerFieldIconContainer}>
             <IconAw name="chevron-down" style={styles.pickerFieldIcon} />
           </View>
@@ -129,7 +137,7 @@ class Publish extends Component {
                 source={{ uri: category.icon }}
                 style={styles.pickerItemIcon}
               />
-              <Text style={styles.pickerItemText}>{category.name}</Text>
+              <Text >{category.name}</Text>
             </View>
           ) : null
         )}
@@ -149,11 +157,13 @@ class Publish extends Component {
     const { navigation } = this.props;
     const { state: { params } } = navigation;
 
-    this.setState({
-      image: params.response,
-      preview: { uri: params.response.uri },
-      mediaType: params.mediaType
-    })
+    if (params) {
+      this.setState({
+        image: params.response,
+        preview: { uri: params.response.uri },
+        mediaType: params.mediaType
+      })
+    }
 
     const { loadReportTypes } = this.props;
 

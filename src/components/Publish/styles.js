@@ -23,7 +23,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
   },
   button: {
-    paddingVertical: 15,
+    paddingVertical: 20,
     borderBottomColor: "#e5e5e5",
     borderBottomWidth: 1
   },
@@ -87,15 +87,15 @@ const styles = StyleSheet.create({
     fontSize: 16
   },
   pickerFieldContainer: {
-    borderWidth: 1,
-    borderColor: "rgba(33,58,130,0.2)",
-    borderRadius: metrics.baseRadius * 7,
+    // borderWidth: 1,
+    // borderColor: "rgba(33,58,130,0.2)",
+    // borderRadius: metrics.baseRadius * 7,
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: metrics.baseMargin,
-    paddingHorizontal: metrics.basePadding,
-    paddingVertical: metrics.basePadding / 2
+    // marginBottom: metrics.baseMargin,
+    // paddingHorizontal: metrics.basePadding,
+    // paddingVertical: metrics.basePadding / 2
   },
   pickerFieldIconContainer: {
     backgroundColor: colors.worSky.blue,
