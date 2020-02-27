@@ -1,7 +1,16 @@
 import React, { Component } from 'react';
-import { View, Text, TextInput, TouchableOpacity, Image, Alert } from 'react-native';
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  Image,
+  Alert,
+  Platform
+} from 'react-native';
 import { CustomPicker } from "react-native-custom-picker";
 import MapboxGL from "@react-native-mapbox-gl/maps";
+import Autocomplete from "react-native-autocomplete-input";
 
 import { bindActionCreators } from "redux";
 import { connect } from "react-redux";
@@ -9,11 +18,14 @@ import { connect } from "react-redux";
 import { Creators as PublishActions } from "~/store/ducks/publish";
 
 import CameraRollHeader from "../../components/CameraRollHeader";
+import AutocompleteItem from "~/components/AutocompleteItem";
 
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import IconAw from "react-native-vector-icons/FontAwesome5";
 
 import styles from "./styles";
+
+import { colors, metrics } from "~/styles";
 
 MapboxGL.setAccessToken(
   "sk.eyJ1Ijoiam9lbGJhbnphdHRvIiwiYSI6ImNrNDk2cmkzNzAwdHkzZHMyY2x2ZGh0eXYifQ.EeAfcaGLuGKv0FV90GT27g"
@@ -30,6 +42,12 @@ class Publish extends Component {
     mediaType: null,
     mapView: null,
     follow: true,
+    search: "",
+    hideResults: true,
+    location: {
+      latitude: 0,
+      longitude: 0
+    },
   };
 
   handleMapPan = async () => {
@@ -84,6 +102,18 @@ class Publish extends Component {
       { cancelable: false },
     );
   }
+
+  renderAutocomplete = ({ item }) => {
+    const { navigation } = this.props;
+
+    return (
+      <AutocompleteItem
+        item={item}
+        navigation={navigation}
+        cleanField={() => this.setState({ search: "" })}
+      />
+    );
+  };
 
   renderHeader = () => (
     <View style={styles.pickerHeaderContainer}>
@@ -153,6 +183,12 @@ class Publish extends Component {
     navigation.navigate('Feed');
   };
 
+  loadSearch = async (search, lat, lng) => {
+    const { loadSearch } = this.props;
+    await loadSearch(search, lat, lng);
+    this.setState({ search, hideResults: false });
+  };
+
   async componentWillMount() {
     const { navigation } = this.props;
     const { state: { params } } = navigation;
@@ -171,9 +207,14 @@ class Publish extends Component {
   }
 
   render() {
-    const { follow, description } = this.state
-    const { navigation, reportTypes } = this.props;
+    const { follow, description, search, hideResults, location } = this.state
+    const { navigation, reportTypes, searchResult } = this.props;
     const { state: { params } } = navigation;
+
+    let result = [];
+
+    if (typeof search !== null && String(search).length > 0)
+      result = searchResult;
 
     return (
       <View style={styles.container} >
@@ -205,6 +246,56 @@ class Publish extends Component {
               fieldTemplate={this.renderField}
               modalStyle={styles.customPickerModal}
               onValueChange={value => this.setState({ entity_id: value.entity_id })}
+            />
+          </View>
+
+          <View style={styles.searchContainer}>
+            {String(search).length > 0 ? (
+              <TouchableOpacity
+                style={styles.iconContainer}
+                onPress={() =>
+                  this.setState({ search: "", scrollEnabled: true })
+                }
+              >
+                <Icon name="times" style={styles.searchIcon} />
+              </TouchableOpacity>
+            ) : (
+                <View style={styles.iconContainer}>
+                  <Icon name="search" style={styles.searchIcon} />
+                </View>
+              )}
+            <Autocomplete
+              data={result}
+              onChangeText={search => {
+                this.loadSearch(search, location.latitude, location.longitude);
+                this.setState({ scrollEnabled: false });
+              }}
+              style={styles.searchInput}
+              placeholder="Ex.: broken aircraft, airports, NY heliport..."
+              value={search}
+              renderItem={this.renderAutocomplete}
+              listStyle={{
+                maxHeight: metrics.height / 3,
+                width: metrics.width / 1.2 + 19,
+                left: Platform.OS == "ios" ? -40 : -50,
+                borderColor: "white"
+              }}
+              keyExtractor={(item, i) => String(i)}
+              inputContainerStyle={{
+                borderColor: "white"
+              }}
+              hideResults={hideResults}
+              onFocus={() =>
+                String(search).length > 0
+                  ? this.setState({
+                    hideResults: false,
+                    scrollEnabled: false
+                  })
+                  : this.setState({ scrollEnabled: true })
+              }
+              onBlur={() =>
+                this.setState({ hideResults: true, scrollEnabled: true })
+              }
             />
           </View>
 
@@ -262,7 +353,8 @@ const mapStateToProps = state => (console.log(state),
     uri: state.publish.uri,
     loadButton: state.publish.loadButton,
     mute: state.publish.mute,
-    loadMedia: state.publish.loadMedia
+    loadMedia: state.publish.loadMedia,
+    searchResult: state.search.searchResult
   });
 
 const mapDispatchToProps = dispatch =>

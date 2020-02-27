@@ -2,16 +2,18 @@ import { StyleSheet } from "react-native";
 
 const styles = StyleSheet.create({
   annotationContainer: {
-    width: 260,
-    height: 260,
+    flex: 1,
+    width: 25,
+    height: 25,
     alignItems: "center",
     justifyContent: "center",
     borderRadius: 15
   },
 
   annotationFill: {
-    width: 260,
-    height: 260
+    width: 25,
+    height: 25,
+    zIndex: 999
   }
 });
 
