@@ -41,7 +41,7 @@ const MapMarker = ({ posts, openInfoModal }) => {
 
   return (
     <>
-      <MapboxGL.Images images={{ ...reorderCategories, assets: ["pin"] }} />
+      <MapboxGL.Images images={{ ...reorderCategories }} />
       <MapboxGL.ShapeSource
         id="symbolLocationSource"
         hitbox={{ width: 30, height: 30 }}

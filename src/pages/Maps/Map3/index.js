@@ -244,9 +244,9 @@ const Maps3 = props => {
         }}
         onPress={cleanSearchAndCenterMap}
         onRegionDidChange={handleMapPan}
+        userTrackingMode
       >
         <MapMarker posts={posts} openInfoModal={openInfoModal} />
-        <MapboxGL.UserLocation visible animated />
         <MapboxGL.Camera
           zoomLevel={12}
           followUserLocation={follow}
@@ -254,6 +254,7 @@ const Maps3 = props => {
           followHeading={1}
           ref={setMapCamera}
         />
+        <MapboxGL.UserLocation visible animated />
       </MapboxGL.MapView>
 
       <Image source={plane} style={styles.planeOnMap} height={64} width={64} />
