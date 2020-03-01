@@ -9,16 +9,20 @@ const styles = StyleSheet.create({
     height,
     width,
   },
-  input: {
-  },
   inputsContainer: {
     paddingVertical: 10,
     paddingHorizontal: 20
   },
+  inputAutocomplete: {
+    display: "flex",
+    flexDirection: "row",
+    borderBottomColor: "#e5e5e5",
+    borderBottomWidth: 1,
+  },
   inputView: {
     display: "flex",
     flexDirection: "row",
-    paddingVertical: 15,
+    // paddingVertical: 15,
     borderBottomColor: "#e5e5e5",
     borderBottomWidth: 1,
   },
@@ -44,6 +48,7 @@ const styles = StyleSheet.create({
   imagePreviewContainer: {
     height: 75,
     width: 75,
+    marginVertical: 15
   },
   playIcon: {
     zIndex: 999,
@@ -159,6 +164,10 @@ const styles = StyleSheet.create({
     height: 48,
     width: metrics.width / 1.3
   },
+  mapView: {
+    height: height / 2,
+    // width: wi
+  }
 });
 
 export default styles;

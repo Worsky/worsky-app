@@ -153,22 +153,25 @@ const feedTabNavigator = createBottomTabNavigator(
     Publish: {
       screen: Publish
     }
-  }, {
-  resetOnBlur: true,
-  tabBarOptions: {
-    showIcon: true,
-    showLabel: false,
-    activeTintColor: colors.worSky.black,
-    inactiveTintColor: colors.worSky.black,
-    style: {
-      backgroundColor: colors.worSky.white
-    }
   },
-  navigationOptions: () => ({
-    header: null,
-    tabBarVisible: false,
-  })
-})
+  {
+    initialRouteName: 'Photo',
+    resetOnBlur: true,
+    tabBarOptions: {
+      showIcon: true,
+      showLabel: false,
+      activeTintColor: colors.worSky.black,
+      inactiveTintColor: colors.worSky.black,
+      style: {
+        backgroundColor: colors.worSky.white
+      }
+    },
+    navigationOptions: () => ({
+      header: null,
+      tabBarVisible: false,
+    })
+  }
+)
 
 const tabNavigator = createBottomTabNavigator(
   {
@@ -243,6 +246,7 @@ const tabNavigator = createBottomTabNavigator(
     }
   },
   {
+    resetOnBlur: true,
     tabBarOptions: {
       showIcon: true,
       showLabel: false,

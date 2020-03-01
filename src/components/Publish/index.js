@@ -20,8 +20,9 @@ import { connect } from "react-redux";
 import { Creators as PublishActions } from "~/store/ducks/publish";
 import { Creators as searchActions } from "~/store/ducks/search";
 
-import CameraRollHeader from "../../components/CameraRollHeader";
+import CameraRollHeader from "~/components/CameraRollHeader";
 import AutocompleteItem from "~/components/AutocompleteItem";
+import MapMarker from "~/components/MapMarker";
 
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import IconAw from "react-native-vector-icons/FontAwesome5";
@@ -44,7 +45,6 @@ class Publish extends Component {
     image: {},
     visible: false,
     mediaType: null,
-    mapView: null,
     follow: true,
     search: "",
     hideResults: true,
@@ -54,13 +54,22 @@ class Publish extends Component {
     },
     scrollEnabled: true,
     mapCamera: null,
+    mapView: null,
     categories: [],
     compassHeading: 0,
-    userPosition: {}
+    userPosition: {},
+    infoPoint: {},
+    infoModalVisible: false,
+    mapLoaded: false,
+    filters: { all: true },
+    posts: []
   };
 
   handleMapPan = async () => {
     try {
+      const { mapLoaded, mapView, filters } = this.state;
+      console.log('apiResponse');
+
       if (!mapLoaded) return;
 
       const [[lng1, lat1], [lng2, lat2]] = await mapView.getVisibleBounds();
@@ -86,15 +95,15 @@ class Publish extends Component {
         pointIds
       );
 
-      setPosts(apiResponse.data.data);
+      console.log(apiResponse);
+
+
+      this.setState({ posts: apiResponse.data.data })
     } catch (error) {
       return error;
     }
   };
 
-  setMapView = (value) => {
-    this.setState({ mapView: value })
-  }
   handleFunction = () => {
 
     Alert.alert(
@@ -216,6 +225,36 @@ class Publish extends Component {
       });
   };
 
+  openInfoModal = point => {
+    this.setState({
+      infoPoint: point,
+      infoModalVisible: true,
+    });
+
+    this.mapCenterOnPoint(point);
+  };
+
+  mapCenterOnPoint = async point => {
+    try {
+      if (!mapLoaded) return;
+
+      const goToCoords = [
+        Number(point.point_type.longitude || point.longitude),
+        Number(point.point_type.latitude || point.latitude)
+      ];
+
+      if (mapCamera) {
+        await setFollow(false);
+
+        await mapCamera.flyTo(goToCoords);
+      } else {
+        handleNavigation(point);
+      }
+    } catch (error) {
+      return error;
+    }
+  };
+
   async componentWillMount() {
     const { navigation } = this.props;
     const { state: { params } } = navigation;
@@ -228,6 +267,12 @@ class Publish extends Component {
       })
     }
 
+    this.setState({
+      description: "",
+      entity_id: null,
+      preview: null
+    })
+
     const { loadReportTypes } = this.props;
 
     await loadReportTypes();
@@ -238,9 +283,10 @@ class Publish extends Component {
   }
 
   render() {
-    const { follow, description, search, hideResults, location } = this.state
+    const { follow, description, search, hideResults, location, mapCamera, mapView, posts } = this.state
     const { navigation, reportTypes, searchResult } = this.props;
     const { state: { params } } = navigation;
+    console.log(mapView);
 
     let result = [];
 
@@ -267,7 +313,20 @@ class Publish extends Component {
             </TextInput>
           </View>
 
-          <View style={styles.searchContainer}>
+          <View style={styles.viewPickerModal}>
+            <CustomPicker
+              placeholder="Select your country"
+              options={reportTypes}
+              headerTemplate={this.renderHeader}
+              getLabel={item => item.name}
+              optionTemplate={this.renderItem}
+              fieldTemplate={this.renderField}
+              modalStyle={styles.customPickerModal}
+              onValueChange={value => this.setState({ entity_id: value.entity_id })}
+            />
+          </View>
+
+          <View style={styles.inputAutocomplete}>
             {String(search).length > 0 ? (
               <TouchableOpacity
                 style={styles.iconContainer}
@@ -317,47 +376,32 @@ class Publish extends Component {
             />
           </View>
 
-          <View style={styles.viewPickerModal}>
-            <CustomPicker
-              placeholder="Select your country"
-              options={reportTypes}
-              headerTemplate={this.renderHeader}
-              getLabel={item => item.name}
-              optionTemplate={this.renderItem}
-              fieldTemplate={this.renderField}
-              modalStyle={styles.customPickerModal}
-              onValueChange={value => this.setState({ entity_id: value.entity_id })}
-            />
-          </View>
-
-          {/* <View>
+          <View style={styles.mapView}>
             <MapboxGL.MapView
               rotateEnabled={true}
               showUserLocation={false}
               style={{ flex: 1 }}
-              ref={setMapView}
+              ref={mapView => this.mapView = mapView}
               styleURL={MapboxGL.StyleURL.Light}
               logoEnabled={false}
-              onDidFinishLoadingMap={() => {
-                setMapLoaded(true);
-              }}
-              onPress={cleanSearchAndCenterMap}
-              onRegionDidChange={handleMapPan}
+              onDidFinishLoadingMap={() => this.setState({ mapLoaded: true })}
+              // onPress={cleanSearchAndCenterMap}
+              onRegionDidChange={() => this.handleMapPan()}
             >
-              <MapMarker posts={posts} openInfoModal={openInfoModal} />
+              <MapMarker posts={posts} openInfoModal={() => this.openInfoModal()} />
               <MapboxGL.UserLocation visible />
               <MapboxGL.Camera
                 zoomLevel={12}
                 followUserLocation={follow}
                 followUserMode={follow ? "course" : "normal"}
                 followHeading={1}
-                ref={setMapCamera}
+                ref={mapCamera => this.mapCamera = mapCamera}
               />
             </MapboxGL.MapView>
-          </View> */}
+          </View>
 
         </View>
-      </View>
+      </View >
     );
   }
 
