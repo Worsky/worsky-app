@@ -94,6 +94,10 @@ const feedTabNavigator = createBottomTabNavigator(
         },
         {
           defaultNavigationOptions: {
+            headerStyle: {
+              paddingBottom: 10,
+            },
+            headerTintColor: "#999",
             headerTransparent: true,
             headerRightContainerStyle: {
               marginRight: 10,
@@ -122,6 +126,10 @@ const feedTabNavigator = createBottomTabNavigator(
         },
         {
           defaultNavigationOptions: {
+            headerStyle: {
+              paddingBottom: 10,
+            },
+            headerTintColor: "#999",
             headerTransparent: true,
             headerRightContainerStyle: {
               marginRight: 10,

@@ -14,7 +14,7 @@ function Video({ navigation }) {
       {isFocused() && <CameraInterface navigation={navigation} only="video" />}
     </>
   )
-}
+};
 
 Video.navigationOptions = {
   tabBarIcon: ({ tintColor }) => <Icon name="videocam" size={20} color={tintColor} />

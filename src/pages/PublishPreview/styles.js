@@ -11,7 +11,7 @@ const styles = StyleSheet.create({
   viewPreview: {
     flex: 1,
     alignContent: "center",
-    marginTop: 50,
+    marginTop: 45,
   },
   container: {
     flex: 1,

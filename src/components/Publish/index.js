@@ -330,7 +330,7 @@ class Publish extends Component {
             />
           </View>
 
-          <View>
+          {/* <View>
             <MapboxGL.MapView
               rotateEnabled={true}
               showUserLocation={false}
@@ -354,8 +354,8 @@ class Publish extends Component {
                 ref={setMapCamera}
               />
             </MapboxGL.MapView>
+          </View> */}
 
-          </View>
         </View>
       </View>
     );

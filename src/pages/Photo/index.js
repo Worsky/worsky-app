@@ -11,13 +11,13 @@ function Photo({ navigation }) {
 
   return (
     <>
-      {isFocused() && < CameraInterface navigation={navigation} only="photo" />}
+      {isFocused() && <CameraInterface navigation={navigation} only="photo" />}
     </>
   )
 };
 
-
 Photo.navigationOptions = {
   tabBarIcon: ({ tintColor }) => <Icon name="camera" size={20} color={tintColor} />
 }
+
 export default withNavigationFocus(Photo);
