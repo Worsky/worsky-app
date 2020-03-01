@@ -117,7 +117,48 @@ const styles = StyleSheet.create({
     paddingVertical: 15,
     borderBottomColor: "#e5e5e5",
     borderBottomWidth: 1,
-  }
+  },
+
+  searchContainer: {
+    justifyContent: "center",
+    alignItems: "flex-start",
+    marginTop: -metrics.baseMargin * 1.3,
+    flex: 1,
+    position: "absolute",
+    zIndex: 99,
+    flexDirection: "row",
+    width: Platform.OS == "ios" ? metrics.width : metrics.width / 1.1,
+    top:
+      Platform.OS == "ios" ? metrics.baseMargin * 8 : metrics.baseMargin * 20,
+    left: Platform.OS == "ios" ? 0 : 20,
+    backgroundColor: Platform.OS == "ios" ? "transparent" : "white",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 5
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5
+  },
+  iconContainer: {
+    height: 50,
+    width: 40,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: colors.worSky.white
+  },
+
+  searchIcon: {
+    color: colors.worSky.black,
+    fontSize: 18
+  },
+
+  searchInput: {
+    backgroundColor: colors.worSky.white,
+    height: 48,
+    width: metrics.width / 1.3
+  },
 });
 
 export default styles;

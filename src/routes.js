@@ -199,16 +199,16 @@ const tabNavigator = createBottomTabNavigator(
         )
       }
     },
-    Publish2: {
-      screen: Publish2,
-      navigationOptions: {
-        tabBarIcon: () => (
-          <View style={styles.profileIcon}>
-            <Image source={publish} style={styles.publishIconMenu} />
-          </View>
-        )
-      }
-    },
+    // Publish2: {
+    //   screen: Publish2,
+    //   navigationOptions: {
+    //     tabBarIcon: () => (
+    //       <View style={styles.profileIcon}>
+    //         <Image source={publish} style={styles.publishIconMenu} />
+    //       </View>
+    //     )
+    //   }
+    // },
     Notifications: {
       screen: Notifications,
       navigationOptions: {

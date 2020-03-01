@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { View, TouchableWithoutFeedback, ScrollView } from "react-native";
+import { View, TouchableWithoutFeedback, ScrollView, PermissionsAndroid } from "react-native";
 import Video from "react-native-video";
 import Icon from "react-native-vector-icons/FontAwesome";
 import ImageEditor from "@react-native-community/image-editor";
@@ -80,6 +80,31 @@ export default class Gallery extends Component {
 
     navigation.navigate('Feed');
   }
+
+  // async componentDidMount() {
+  //   await PermissionsAndroid.request(
+  //     PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE,
+  //     {
+  //       title: "Read Store Permission",
+  //       message: "This app needs access to your files",
+  //       buttonNeutral: "Ask Me Later",
+  //       buttonNegative: "Cancel",
+  //       buttonPositive: "OK"
+  //     }
+  //   );
+
+  //   await PermissionsAndroid.request(
+  //     PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
+  //     {
+  //       title: "Write Store Permission",
+  //       message: "This app needs use your local storage",
+  //       buttonNeutral: "Ask Me Later",
+  //       buttonNegative: "Cancel",
+  //       buttonPositive: "OK"
+  //     }
+  //   );
+  // }
+
 
   render() {
     const { paused } = this.state;

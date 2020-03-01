@@ -10,12 +10,15 @@ import {
 } from 'react-native';
 import { CustomPicker } from "react-native-custom-picker";
 import MapboxGL from "@react-native-mapbox-gl/maps";
+import Geolocation from "@react-native-community/geolocation";
+import CompassHeading from "react-native-compass-heading";
 import Autocomplete from "react-native-autocomplete-input";
 
 import { bindActionCreators } from "redux";
 import { connect } from "react-redux";
 
 import { Creators as PublishActions } from "~/store/ducks/publish";
+import { Creators as searchActions } from "~/store/ducks/search";
 
 import CameraRollHeader from "../../components/CameraRollHeader";
 import AutocompleteItem from "~/components/AutocompleteItem";
@@ -26,6 +29,7 @@ import IconAw from "react-native-vector-icons/FontAwesome5";
 import styles from "./styles";
 
 import { colors, metrics } from "~/styles";
+import api from "../../pages/Maps/Map3/api";
 
 MapboxGL.setAccessToken(
   "sk.eyJ1Ijoiam9lbGJhbnphdHRvIiwiYSI6ImNrNDk2cmkzNzAwdHkzZHMyY2x2ZGh0eXYifQ.EeAfcaGLuGKv0FV90GT27g"
@@ -48,6 +52,11 @@ class Publish extends Component {
       latitude: 0,
       longitude: 0
     },
+    scrollEnabled: true,
+    mapCamera: null,
+    categories: [],
+    compassHeading: 0,
+    userPosition: {}
   };
 
   handleMapPan = async () => {
@@ -104,6 +113,7 @@ class Publish extends Component {
   }
 
   renderAutocomplete = ({ item }) => {
+
     const { navigation } = this.props;
 
     return (
@@ -185,8 +195,25 @@ class Publish extends Component {
 
   loadSearch = async (search, lat, lng) => {
     const { loadSearch } = this.props;
+
     await loadSearch(search, lat, lng);
     this.setState({ search, hideResults: false });
+  };
+
+  handleUserPosition = async () => {
+    Geolocation.watchPosition(
+      position => this.setState({ userPosition: position.coords }),
+      error => Alert.alert(error.message),
+      { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
+    );
+
+    const { data: response } = await api.loadCategories();
+    this.setState({ categories: response.data });
+
+    if (CompassHeading)
+      CompassHeading.start(3, degree => {
+        this.setState({ compassHeading: degree })
+      });
   };
 
   async componentWillMount() {
@@ -204,6 +231,10 @@ class Publish extends Component {
     const { loadReportTypes } = this.props;
 
     await loadReportTypes();
+  }
+
+  componentDidMount() {
+    this.handleUserPosition();
   }
 
   render() {
@@ -236,19 +267,6 @@ class Publish extends Component {
             </TextInput>
           </View>
 
-          <View style={styles.viewPickerModal}>
-            <CustomPicker
-              placeholder="Select your country"
-              options={reportTypes}
-              headerTemplate={this.renderHeader}
-              getLabel={item => item.name}
-              optionTemplate={this.renderItem}
-              fieldTemplate={this.renderField}
-              modalStyle={styles.customPickerModal}
-              onValueChange={value => this.setState({ entity_id: value.entity_id })}
-            />
-          </View>
-
           <View style={styles.searchContainer}>
             {String(search).length > 0 ? (
               <TouchableOpacity
@@ -257,11 +275,11 @@ class Publish extends Component {
                   this.setState({ search: "", scrollEnabled: true })
                 }
               >
-                <Icon name="times" style={styles.searchIcon} />
+                <IconAw name="times" style={styles.searchIcon} />
               </TouchableOpacity>
             ) : (
                 <View style={styles.iconContainer}>
-                  <Icon name="search" style={styles.searchIcon} />
+                  <IconAw name="search" style={styles.searchIcon} />
                 </View>
               )}
             <Autocomplete
@@ -299,42 +317,45 @@ class Publish extends Component {
             />
           </View>
 
-          <TouchableOpacity style={styles.button}>
-            <Text>Add Location</Text>
-          </TouchableOpacity>
-          {/*
-          <MapboxGL.MapView
-            style={{ flex: 1 }}
-            onDidFinishLoadingMap={() => {
-              setMapLoaded(true);
-              setFollow(false);
-            }}
-            rotateEnabled={false}
-            compassEnabled
-            animated
-            ref={() => this.setMapView()}
-            showUserLocation
-            styleURL={MapboxGL.StyleURL.Light}
-            logoEnabled={false}
-            compassEnabled={true}
-            onRegionDidChange={() => this.handleMapPan()}
-          >
-            {posts.map(point => (
-              <MapMarker
-                point={point}
-                key={point.entity_id}
-                openInfoModal={openInfoModal}
-              />
-            ))}
-            <MapboxGL.UserLocation visible />
-            <MapboxGL.Camera
-              zoomLevel={12}
-              followHeading={1}
-              followUserLocation={follow}
-              followUserMode={follow ? "course" : "normal"}
-              ref={setMapCamera}
+          <View style={styles.viewPickerModal}>
+            <CustomPicker
+              placeholder="Select your country"
+              options={reportTypes}
+              headerTemplate={this.renderHeader}
+              getLabel={item => item.name}
+              optionTemplate={this.renderItem}
+              fieldTemplate={this.renderField}
+              modalStyle={styles.customPickerModal}
+              onValueChange={value => this.setState({ entity_id: value.entity_id })}
             />
-          </MapboxGL.MapView> */}
+          </View>
+
+          <View>
+            <MapboxGL.MapView
+              rotateEnabled={true}
+              showUserLocation={false}
+              style={{ flex: 1 }}
+              ref={setMapView}
+              styleURL={MapboxGL.StyleURL.Light}
+              logoEnabled={false}
+              onDidFinishLoadingMap={() => {
+                setMapLoaded(true);
+              }}
+              onPress={cleanSearchAndCenterMap}
+              onRegionDidChange={handleMapPan}
+            >
+              <MapMarker posts={posts} openInfoModal={openInfoModal} />
+              <MapboxGL.UserLocation visible />
+              <MapboxGL.Camera
+                zoomLevel={12}
+                followUserLocation={follow}
+                followUserMode={follow ? "course" : "normal"}
+                followHeading={1}
+                ref={setMapCamera}
+              />
+            </MapboxGL.MapView>
+
+          </View>
         </View>
       </View>
     );
@@ -346,18 +367,17 @@ Publish.navigationOptions = {
   tabBarIcon: ({ tintColor }) => <Icon name="publish" size={20} color={tintColor} />
 }
 
-const mapStateToProps = state => (console.log(state),
-  {
-    reportTypes: state.publish.reportTypes,
-    clear: state.publish.clear,
-    uri: state.publish.uri,
-    loadButton: state.publish.loadButton,
-    mute: state.publish.mute,
-    loadMedia: state.publish.loadMedia,
-    searchResult: state.search.searchResult
-  });
+const mapStateToProps = state => ({
+  reportTypes: state.publish.reportTypes,
+  clear: state.publish.clear,
+  uri: state.publish.uri,
+  loadButton: state.publish.loadButton,
+  mute: state.publish.mute,
+  loadMedia: state.publish.loadMedia,
+  searchResult: state.search.searchResult
+});
 
 const mapDispatchToProps = dispatch =>
-  bindActionCreators(PublishActions, dispatch);
+  bindActionCreators({ ...PublishActions, ...searchActions }, dispatch);
 
 export default connect(mapStateToProps, mapDispatchToProps)(Publish);
