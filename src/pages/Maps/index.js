@@ -27,14 +27,4 @@ class Maps extends Component {
   }
 }
 
-// const mapStateToProps = state => ({
-//   loading: state.maps.loading,
-//   faliure: state.maps.faliure,
-//   posts: state.maps.posts
-// });
-
-// const mapDispatchToProps = dispatch => bindActionCreators(MapTypes, dispatch);
-
-// export default connect(mapStateToProps, mapDispatchToProps)(Maps);
-
 export default Maps;

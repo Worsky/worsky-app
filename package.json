@@ -3,6 +3,8 @@
   "version": "1.9.0",
   "private": true,
   "scripts": {
+    "android": "adb reverse tcp:9090 tcp:9090 && react-native run-android",
+    "androidClean": "adb reverse tcp:9090 tcp:9090 && rm -rf android/app/build/generated/res/google-services/debug && react-native run-android",
     "start": "node node_modules/react-native/local-cli/cli.js start",
     "postinstall": "jetify",
     "test": "jest",
