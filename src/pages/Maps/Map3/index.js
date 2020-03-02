@@ -234,14 +234,53 @@ const Maps3 = props => {
     Geolocation.getCurrentPosition(({ coords }) => {
       const { longitude, latitude } = coords;
 
-      if (
-        _latitude.toFixed(4) != latitude.toFixed(4) ||
-        _longitude.toFixed(4) != longitude.toFixed(4)
-      )
-        setFollow(false);
+      const shouldFollowUpdate = errorMarginToDisplayTargetIcon(
+        { _longitude, _latitude },
+        { longitude, latitude }
+      );
+
+      if (!shouldFollowUpdate) setFollow(shouldFollowUpdate);
     });
 
     handleMapPan();
+  };
+
+  const errorMarginToDisplayTargetIcon = (screenCoord, userCoord) => {
+    const { _longitude, _latitude } = screenCoord;
+
+    const _longitudeFormated = Number(_longitude.toFixed(4));
+    const _latitudeFormated = Number(_latitude.toFixed(4));
+
+    const { longitude, latitude } = userCoord;
+
+    const longitudeFormated = Number(longitude.toFixed(4));
+    const latitudeFormated = Number(latitude.toFixed(4));
+
+    const result = { followLatitude: true, followLongitude: true };
+
+    if (_latitudeFormated != latitudeFormated) {
+      let addNumber = 0.0008;
+
+      if (Math.sign(_latitudeFormated) == -1) addNumber = -0.0008;
+
+      const difference = (_latitudeFormated - latitudeFormated).toFixed(4);
+
+      if (difference <= addNumber) result.followLatitude = false;
+    }
+
+    if (_longitudeFormated != longitudeFormated) {
+      let addNumber = 0.0008;
+
+      if (Math.sign(_longitudeFormated) == -1) addNumber = -0.0008;
+
+      const difference = (_longitudeFormated - longitudeFormated).toFixed(4);
+
+      if (difference <= addNumber) result.followLongitude = false;
+    }
+
+    if (!result.followLatitude || !result.followLongitude) return false;
+
+    return true;
   };
 
   return (
