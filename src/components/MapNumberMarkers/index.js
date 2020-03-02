@@ -4,10 +4,8 @@ import PropTypes from "prop-types";
 
 import styles from "./styles";
 
-const MapNumberMarkers = ({ text, onPress }) => (
-  <Text style={styles.instrumentItem} onPress={onPress}>
-    {text}
-  </Text>
+const MapNumberMarkers = ({ text }) => (
+  <Text style={styles.instrumentItem}>{text}</Text>
 );
 
 MapNumberMarkers.propTypes = {

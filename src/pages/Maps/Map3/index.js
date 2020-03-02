@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, Image, TouchableOpacity, Keyboard } from "react-native";
+import { View, Image, TouchableOpacity, Keyboard, Text } from "react-native";
 import Icon from "react-native-vector-icons/FontAwesome";
 import MapboxGL from "@react-native-mapbox-gl/maps";
 import Geolocation from "@react-native-community/geolocation";
@@ -37,7 +37,6 @@ const Maps3 = props => {
   const [infoModalVisible, setInfoModalVisible] = useState(false);
   const [filterModalVisible, setFilterModalVisible] = useState(false);
   const [follow, setFollow] = useState(true);
-  const [followUserMode, setFollowUserMode] = useState("normal");
   const [compassHeading, setCompassHeading] = useState(0);
 
   const handleSearch = async data => {
@@ -98,7 +97,7 @@ const Maps3 = props => {
 
       if (follow) setFollow(false);
 
-      await mapCamera.flyTo(newCenter);
+      await mapCamera.moveTo(newCenter, 1200);
 
       setFollow(true);
     } catch (error) {
@@ -107,19 +106,18 @@ const Maps3 = props => {
   };
 
   const handleUserPosition = async () => {
-    Geolocation.watchPosition(
-      position => setUserPosition(position.coords),
-      error => Alert.alert(error.message),
-      { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
-    );
+    Geolocation.getCurrentPosition(({ coords }) => {
+      setUserPosition(coords);
+    });
 
     const { data: response } = await api.loadCategories();
     setCategories(response.data);
 
-    if (CompassHeading)
+    if (CompassHeading) {
       CompassHeading.start(3, degree => {
         setCompassHeading(degree);
       });
+    }
   };
 
   useEffect(() => {
@@ -196,7 +194,7 @@ const Maps3 = props => {
       if (mapCamera) {
         await setFollow(false);
 
-        await mapCamera.flyTo(goToCoords);
+        await mapCamera.moveTo(goToCoords, 1200);
       } else {
         handleNavigation(point);
       }
@@ -230,11 +228,25 @@ const Maps3 = props => {
     setSearch("");
   };
 
+  const onRegionDidChange = async () => {
+    const [_longitude, _latitude] = await mapView.getCenter();
+
+    Geolocation.getCurrentPosition(({ coords }) => {
+      const { longitude, latitude } = coords;
+
+      if (
+        _latitude.toFixed(4) != latitude.toFixed(4) ||
+        _longitude.toFixed(4) != longitude.toFixed(4)
+      )
+        setFollow(false);
+    });
+
+    handleMapPan();
+  };
+
   return (
     <View style={styles.container}>
       <MapboxGL.MapView
-        rotateEnabled={true}
-        showUserLocation={false}
         style={{ flex: 1 }}
         ref={setMapView}
         styleURL={MapboxGL.StyleURL.Light}
@@ -243,46 +255,48 @@ const Maps3 = props => {
           setMapLoaded(true);
         }}
         onPress={cleanSearchAndCenterMap}
-        onRegionDidChange={handleMapPan}
-        userTrackingMode
+        onRegionDidChange={onRegionDidChange}
       >
-        <MapMarker posts={posts} openInfoModal={openInfoModal} />
         <MapboxGL.Camera
           zoomLevel={12}
           followUserLocation={follow}
-          followUserMode={followUserMode}
-          followHeading={1}
+          followUserMode={follow ? "course" : "normal"}
+          followHeading={follow ? compassHeading : 0}
           ref={setMapCamera}
+          zoomLevel={14}
         />
-        <MapboxGL.UserLocation visible animated />
+        <MapMarker posts={posts} openInfoModal={openInfoModal} />
+        <MapboxGL.UserLocation
+          onUpdate={({ coords }) => {
+            if (follow) mapCamera.moveTo([coords.longitude, coords.latitude]);
+          }}
+        />
       </MapboxGL.MapView>
 
       <Image source={plane} style={styles.planeOnMap} height={64} width={64} />
 
-      <TouchableOpacity style={styles.myPositionButton} onPress={centerMapOnMe}>
-        <Icon name="crosshairs" size={22} color={"black"} />
-      </TouchableOpacity>
+      {!follow && (
+        <TouchableOpacity
+          style={styles.myPositionButton}
+          onPress={centerMapOnMe}
+        >
+          <Icon name="crosshairs" size={22} color={"black"} />
+        </TouchableOpacity>
+      )}
 
       <View style={styles.instruments}>
         <MapNumberMarkers
-          onPress={() => setFollowUserMode("normal")}
           text={`${Math.round(
             (userPosition.speed < 0 ? 0 : userPosition.speed) * 1.94384
-          )}${" "}
-              kt`}
+          )} kt`}
         />
 
-        <MapNumberMarkers
-          onPress={() => setFollowUserMode("compass")}
-          text={`${Math.round(compassHeading || 0)}º`}
-        />
+        <MapNumberMarkers text={`${Math.round(compassHeading || 0)}º`} />
 
         <MapNumberMarkers
-          onPress={() => setFollowUserMode("course")}
           text={`${Math.round(userPosition.altitude * 3.28084)} ft`}
         />
       </View>
-
       <View style={styles.searchContainer}>
         <Autocomplete
           data={result}
@@ -330,7 +344,6 @@ const Maps3 = props => {
           close={true}
         />
       </View>
-
       {infoPoint && (
         <CustomModal
           close={false}

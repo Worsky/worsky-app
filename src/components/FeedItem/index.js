@@ -90,7 +90,6 @@ class FeedItem extends Component {
 
   reportOnePost = async (post_id, text) => {
     const { reportPost, showToast } = this.props;
-    // console.tron.log(showToast);
 
     await reportPost(post_id, text);
 

@@ -89,7 +89,7 @@ class FeedHeader extends Component {
       showList
     } = this.props;
     const { search, showListState } = this.state;
-    // console.tron.log(showList, showListState);
+
     let result = [];
     if (typeof search !== null && search.length > 0) result = searchResult;
 
