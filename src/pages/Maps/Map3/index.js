@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, Image, TouchableOpacity, Keyboard, Text } from "react-native";
+import { View, Image, TouchableOpacity, Keyboard } from "react-native";
 import Icon from "react-native-vector-icons/FontAwesome";
 import MapboxGL from "@react-native-mapbox-gl/maps";
 import Geolocation from "@react-native-community/geolocation";
@@ -259,9 +259,9 @@ const Maps3 = props => {
     const result = { followLatitude: true, followLongitude: true };
 
     if (_latitudeFormated != latitudeFormated) {
-      let addNumber = 0.0008;
+      let addNumber = 0.0005;
 
-      if (Math.sign(_latitudeFormated) == -1) addNumber = -0.0008;
+      if (Math.sign(_latitudeFormated) == -1) addNumber = -0.0005;
 
       const difference = (_latitudeFormated - latitudeFormated).toFixed(4);
 
@@ -269,9 +269,9 @@ const Maps3 = props => {
     }
 
     if (_longitudeFormated != longitudeFormated) {
-      let addNumber = 0.0008;
+      let addNumber = 0.0005;
 
-      if (Math.sign(_longitudeFormated) == -1) addNumber = -0.0008;
+      if (Math.sign(_longitudeFormated) == -1) addNumber = -0.0005;
 
       const difference = (_longitudeFormated - longitudeFormated).toFixed(4);
 
@@ -287,9 +287,11 @@ const Maps3 = props => {
     <View style={styles.container}>
       <MapboxGL.MapView
         style={{ flex: 1 }}
-        ref={setMapView}
         styleURL={MapboxGL.StyleURL.Light}
         logoEnabled={false}
+        compassEnabled={false}
+        attributionEnabled={false}
+        ref={setMapView}
         onDidFinishLoadingMap={() => {
           setMapLoaded(true);
         }}
