@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { View, Image, TouchableOpacity, Keyboard } from "react-native";
+import { View, Image, TouchableOpacity, Keyboard, Text } from "react-native";
 import Icon from "react-native-vector-icons/FontAwesome";
 import MapboxGL from "@react-native-mapbox-gl/maps";
 import Geolocation from "@react-native-community/geolocation";
 import Autocomplete from "react-native-autocomplete-input";
 import CompassHeading from "react-native-compass-heading";
+import Haversine from "haversine";
 
 import AutocompleteItem from "~/components/AutocompleteItem";
 import CustomModal from "~/components/CustomModal";
@@ -38,6 +39,7 @@ const Maps3 = props => {
   const [filterModalVisible, setFilterModalVisible] = useState(false);
   const [follow, setFollow] = useState(true);
   const [compassHeading, setCompassHeading] = useState(0);
+  const [speed, setSpeed] = useState(0);
 
   const handleSearch = async data => {
     setSearch(data);
@@ -106,17 +108,19 @@ const Maps3 = props => {
   };
 
   const handleUserPosition = async () => {
-    Geolocation.getCurrentPosition(({ coords }) => {
-      setUserPosition(coords);
-    });
+    try {
+      Geolocation.getCurrentPosition(({ coords }) => {
+        setUserPosition(coords);
+      });
 
-    const { data: response } = await api.loadCategories();
-    setCategories(response.data);
-
-    if (CompassHeading) {
       CompassHeading.start(3, degree => {
         setCompassHeading(degree);
       });
+
+      const { data: response } = await api.loadCategories();
+      setCategories(response.data);
+    } catch (error) {
+      return error;
     }
   };
 
@@ -233,6 +237,16 @@ const Maps3 = props => {
 
     Geolocation.getCurrentPosition(({ coords }) => {
       const { longitude, latitude } = coords;
+      const _speed = Haversine(
+        {
+          latitude: userPosition.latitude,
+          longitude: userPosition.longitude
+        },
+        { latitude, longitude }
+      );
+      // * 1.94384
+
+      setSpeed(Math.round(_speed));
 
       const shouldFollowUpdate = errorMarginToDisplayTargetIcon(
         { _longitude, _latitude },
@@ -240,9 +254,9 @@ const Maps3 = props => {
       );
 
       if (!shouldFollowUpdate) setFollow(shouldFollowUpdate);
-    });
 
-    handleMapPan();
+      setUserPosition(coords);
+    });
   };
 
   const errorMarginToDisplayTargetIcon = (screenCoord, userCoord) => {
@@ -326,16 +340,12 @@ const Maps3 = props => {
       )}
 
       <View style={styles.instruments}>
-        <MapNumberMarkers
-          text={`${Math.round(
-            (userPosition.speed < 0 ? 0 : userPosition.speed) * 1.94384
-          )} kt`}
-        />
+        <MapNumberMarkers text={`${speed} kt`} />
 
         <MapNumberMarkers text={`${Math.round(compassHeading || 0)}º`} />
 
         <MapNumberMarkers
-          text={`${Math.round(userPosition.altitude * 3.28084)} ft`}
+          text={`${Math.round(userPosition.altitude * 3.2808)} ft`}
         />
       </View>
       <View style={styles.searchContainer}>
