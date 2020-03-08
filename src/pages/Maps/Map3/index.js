@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, Image, TouchableOpacity, Keyboard, Text } from "react-native";
+import { View, Image, TouchableOpacity, Keyboard, Alert } from "react-native";
 import Icon from "react-native-vector-icons/FontAwesome";
 import MapboxGL from "@react-native-mapbox-gl/maps";
 import Geolocation from "@react-native-community/geolocation";
@@ -235,28 +235,35 @@ const Maps3 = props => {
   const onRegionDidChange = async () => {
     const [_longitude, _latitude] = await mapView.getCenter();
 
-    Geolocation.getCurrentPosition(({ coords }) => {
-      const { longitude, latitude } = coords;
-      const _speed = Haversine(
-        {
-          latitude: userPosition.latitude,
-          longitude: userPosition.longitude
-        },
-        { latitude, longitude }
-      );
-      // * 1.94384
+    Geolocation.getCurrentPosition(
+      ({ coords }) => {
+        const { longitude, latitude } = coords;
+        const _speed = Haversine(
+          {
+            latitude: userPosition.latitude,
+            longitude: userPosition.longitude
+          },
+          { latitude, longitude }
+        );
+        // * 1.94384
 
-      setSpeed(Math.round(_speed));
+        setSpeed(Math.round(_speed));
 
-      const shouldFollowUpdate = errorMarginToDisplayTargetIcon(
-        { _longitude, _latitude },
-        { longitude, latitude }
-      );
+        const shouldFollowUpdate = errorMarginToDisplayTargetIcon(
+          { _longitude, _latitude },
+          { longitude, latitude }
+        );
 
-      if (!shouldFollowUpdate) setFollow(shouldFollowUpdate);
+        if (!shouldFollowUpdate) setFollow(shouldFollowUpdate);
 
-      setUserPosition(coords);
-    });
+        setUserPosition(coords);
+      },
+      error => Alert.alert("Error at tools", JSON.stringify(error)),
+      {
+        enableHighAccuracy: false,
+        timeout: 5000
+      }
+    );
   };
 
   const errorMarginToDisplayTargetIcon = (screenCoord, userCoord) => {
