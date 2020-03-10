@@ -1,5 +1,13 @@
 import React, { useState, useEffect } from "react";
-import { View, Image, TouchableOpacity, Keyboard, Alert } from "react-native";
+import {
+  View,
+  Image,
+  TouchableOpacity,
+  Keyboard,
+  Alert,
+  Text,
+  PermissionsAndroid
+} from "react-native";
 import Icon from "react-native-vector-icons/FontAwesome";
 import MapboxGL from "@react-native-mapbox-gl/maps";
 import Geolocation from "@react-native-community/geolocation";
@@ -40,6 +48,12 @@ const Maps3 = props => {
   const [follow, setFollow] = useState(true);
   const [compassHeading, setCompassHeading] = useState(0);
   const [speed, setSpeed] = useState(0);
+
+  const [logModal, setLogModal] = useState(false);
+  const [permissions, setPermissions] = useState({
+    coarse: false,
+    fine: false
+  });
 
   const handleSearch = async data => {
     setSearch(data);
@@ -119,8 +133,39 @@ const Maps3 = props => {
 
       const { data: response } = await api.loadCategories();
       setCategories(response.data);
+
+      const fine = await PermissionsAndroid.check(
+        PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION
+      );
+      const coarse = await PermissionsAndroid.check(
+        PermissionsAndroid.PERMISSIONS.ACCESS_COARSE_LOCATION
+      );
+
+      !fine &&
+        (await PermissionsAndroid.request(
+          PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+          {
+            title: "Worsky Fine Location Permission",
+            message: "Fine Location",
+            buttonNegative: "Cancel",
+            buttonPositive: "OK"
+          }
+        ));
+
+      !coarse &&
+        (await PermissionsAndroid.request(
+          PermissionsAndroid.PERMISSIONS.ACCESS_COARSE_LOCATION,
+          {
+            title: "Worsky Coarse Location Permission",
+            message: "Coarse Location",
+            buttonNegative: "Cancel",
+            buttonPositive: "OK"
+          }
+        ));
+
+      await setPermissions({ ...permissions, fine, coarse });
     } catch (error) {
-      return error;
+      Alert.alert("Error at mounting request", JSON.stringify(error));
     }
   };
 
@@ -245,7 +290,6 @@ const Maps3 = props => {
           },
           { latitude, longitude }
         );
-        // * 1.94384
 
         setSpeed(Math.round(_speed));
 
@@ -260,8 +304,9 @@ const Maps3 = props => {
       },
       error => Alert.alert("Error at tools", JSON.stringify(error)),
       {
-        enableHighAccuracy: false,
-        timeout: 5000
+        enableHighAccuracy: true,
+        timeout: 20000
+        // maximumAge: 2000
       }
     );
   };
@@ -349,10 +394,34 @@ const Maps3 = props => {
       <View style={styles.instruments}>
         <MapNumberMarkers text={`${speed} kt`} />
 
-        <MapNumberMarkers text={`${Math.round(compassHeading || 0)}º`} />
+        <MapNumberMarkers
+          text={`${Math.round(compassHeading || 0)}º`}
+          onPress={() => setLogModal(true)}
+        />
 
         <MapNumberMarkers
           text={`${Math.round(userPosition.altitude * 3.2808)} ft`}
+        />
+
+        <CustomModal
+          close={true}
+          visible={logModal}
+          changeVisibility={() => setLogModal(false)}
+          content={
+            <View>
+              <Text>Fine Location: {permissions.fine ? "true" : "false"}</Text>
+              <Text>
+                Coarse Location: {permissions.coarse ? "true" : "false"}
+              </Text>
+              <Text>Speed | Haversine: {speed}</Text>
+              <Text>Compass | CompassHeading: {compassHeading}</Text>
+              <Text>Speed | Geolocation: {userPosition.speed}</Text>
+              <Text>Heading | Geolocation: {userPosition.heading}</Text>
+              <Text>Altitude | Geolocation: {userPosition.altitude}</Text>
+              <Text>Longitude | Geolocation: {userPosition.longitude}</Text>
+              <Text>Latitude | Geolocation: {userPosition.latitude}</Text>
+            </View>
+          }
         />
       </View>
       <View style={styles.searchContainer}>
