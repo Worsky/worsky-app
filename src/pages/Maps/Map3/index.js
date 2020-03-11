@@ -1,10 +1,19 @@
 import React, { useState, useEffect } from "react";
-import { View, Image, TouchableOpacity, Keyboard } from "react-native";
+import {
+  View,
+  Image,
+  TouchableOpacity,
+  Keyboard,
+  Alert,
+  Text,
+  PermissionsAndroid
+} from "react-native";
 import Icon from "react-native-vector-icons/FontAwesome";
 import MapboxGL from "@react-native-mapbox-gl/maps";
 import Geolocation from "@react-native-community/geolocation";
 import Autocomplete from "react-native-autocomplete-input";
 import CompassHeading from "react-native-compass-heading";
+import Haversine from "haversine";
 
 import AutocompleteItem from "~/components/AutocompleteItem";
 import CustomModal from "~/components/CustomModal";
@@ -38,6 +47,13 @@ const Maps3 = props => {
   const [filterModalVisible, setFilterModalVisible] = useState(false);
   const [follow, setFollow] = useState(true);
   const [compassHeading, setCompassHeading] = useState(0);
+  const [speed, setSpeed] = useState(0);
+
+  const [logModal, setLogModal] = useState(false);
+  const [permissions, setPermissions] = useState({
+    coarse: false,
+    fine: false
+  });
 
   const handleSearch = async data => {
     setSearch(data);
@@ -105,18 +121,55 @@ const Maps3 = props => {
     }
   };
 
+  const dispatchAndVerifyPermissions = async () => {
+    const fine = await PermissionsAndroid.check(
+      PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION
+    );
+    const coarse = await PermissionsAndroid.check(
+      PermissionsAndroid.PERMISSIONS.ACCESS_COARSE_LOCATION
+    );
+
+    !fine &&
+      (await PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+        {
+          title: "Worsky Fine Location Permission",
+          message: "Fine Location",
+          buttonNegative: "Cancel",
+          buttonPositive: "OK"
+        }
+      ));
+
+    !coarse &&
+      (await PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS.ACCESS_COARSE_LOCATION,
+        {
+          title: "Worsky Coarse Location Permission",
+          message: "Coarse Location",
+          buttonNegative: "Cancel",
+          buttonPositive: "OK"
+        }
+      ));
+
+    await setPermissions({ ...permissions, fine, coarse });
+  };
+
   const handleUserPosition = async () => {
-    Geolocation.getCurrentPosition(({ coords }) => {
-      setUserPosition(coords);
-    });
+    try {
+      Geolocation.getCurrentPosition(({ coords }) => {
+        setUserPosition(coords);
+      });
 
-    const { data: response } = await api.loadCategories();
-    setCategories(response.data);
-
-    if (CompassHeading) {
       CompassHeading.start(3, degree => {
         setCompassHeading(degree);
       });
+
+      await dispatchAndVerifyPermissions();
+
+      const { data: response } = await api.loadCategories();
+      setCategories(response.data);
+    } catch (error) {
+      return error;
     }
   };
 
@@ -228,21 +281,29 @@ const Maps3 = props => {
     setSearch("");
   };
 
-  const onRegionDidChange = async () => {
+  const onRegionDidChanges = async () => {
     const [_longitude, _latitude] = await mapView.getCenter();
 
-    Geolocation.getCurrentPosition(({ coords }) => {
-      const { longitude, latitude } = coords;
+    Geolocation.getCurrentPosition(
+      async ({ coords }) => {
+        const { longitude, latitude } = coords;
 
-      const shouldFollowUpdate = errorMarginToDisplayTargetIcon(
-        { _longitude, _latitude },
-        { longitude, latitude }
-      );
+        const shouldFollowUpdate = errorMarginToDisplayTargetIcon(
+          { _longitude, _latitude },
+          { longitude, latitude }
+        );
 
-      if (!shouldFollowUpdate) setFollow(shouldFollowUpdate);
-    });
+        if (!shouldFollowUpdate) await setFollow(shouldFollowUpdate);
 
-    handleMapPan();
+        await setUserPosition(coords);
+      },
+      error => Alert.alert("Error at tools", JSON.stringify(error)),
+      {
+        enableHighAccuracy: true,
+        timeout: 2000
+        // maximumAge: 2000
+      }
+    );
   };
 
   const errorMarginToDisplayTargetIcon = (screenCoord, userCoord) => {
@@ -296,13 +357,13 @@ const Maps3 = props => {
           setMapLoaded(true);
         }}
         onPress={cleanSearchAndCenterMap}
-        onRegionDidChange={onRegionDidChange}
+        onRegionDidChange={onRegionDidChanges}
       >
         <MapboxGL.Camera
           zoomLevel={12}
           followUserLocation={follow}
           followUserMode={follow ? "course" : "normal"}
-          followHeading={follow ? compassHeading : 0}
+          followHeading={compassHeading}
           ref={setMapCamera}
           zoomLevel={14}
         />
@@ -310,6 +371,17 @@ const Maps3 = props => {
         <MapboxGL.UserLocation
           onUpdate={({ coords }) => {
             if (follow) mapCamera.moveTo([coords.longitude, coords.latitude]);
+
+            const _speed = Haversine(
+              {
+                latitude: userPosition.latitude,
+                longitude: userPosition.longitude
+              },
+              { latitude: coords.latitude, longitude: coords.longitude },
+              { unit: "km" }
+            );
+
+            setSpeed(_speed);
           }}
         />
       </MapboxGL.MapView>
@@ -326,16 +398,37 @@ const Maps3 = props => {
       )}
 
       <View style={styles.instruments}>
+        <MapNumberMarkers text={`${speed.toFixed(1)} kt`} />
+
         <MapNumberMarkers
-          text={`${Math.round(
-            (userPosition.speed < 0 ? 0 : userPosition.speed) * 1.94384
-          )} kt`}
+          text={`${Math.round(compassHeading || 0)}º`}
+          onPress={() => setLogModal(true)}
         />
 
-        <MapNumberMarkers text={`${Math.round(compassHeading || 0)}º`} />
-
         <MapNumberMarkers
-          text={`${Math.round(userPosition.altitude * 3.28084)} ft`}
+          text={`${Math.round(userPosition.altitude * 3.2808)} ft`}
+        />
+
+        <CustomModal
+          close={true}
+          visible={logModal}
+          changeVisibility={() => setLogModal(false)}
+          content={
+            <View>
+              <Text>Fine Location: {permissions.fine ? "true" : "false"}</Text>
+              <Text>
+                Coarse Location: {permissions.coarse ? "true" : "false"}
+              </Text>
+              <Text>Follow mode: {follow ? "course" : "normal"}</Text>
+              <Text>Speed | Haversine: {speed}</Text>
+              <Text>Compass | CompassHeading: {compassHeading}</Text>
+              <Text>Speed | Geolocation: {userPosition.speed}</Text>
+              <Text>Heading | Geolocation: {userPosition.heading}</Text>
+              <Text>Altitude | Geolocation: {userPosition.altitude}</Text>
+              <Text>Longitude | Geolocation: {userPosition.longitude}</Text>
+              <Text>Latitude | Geolocation: {userPosition.latitude}</Text>
+            </View>
+          }
         />
       </View>
       <View style={styles.searchContainer}>
