@@ -1,5 +1,12 @@
 import React, { Component } from "react";
 import { StatusBar, Platform } from "react-native";
+import {
+  accelerometer,
+  gyroscope,
+  setUpdateIntervalForType,
+  SensorTypes
+} from "react-native-sensors";
+import { map, filter } from "rxjs/operators";
 
 import { colors } from "~/styles";
 
