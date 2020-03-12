@@ -1,5 +1,12 @@
 import React, { Component } from "react";
 import { StatusBar, Platform } from "react-native";
+import {
+  accelerometer,
+  gyroscope,
+  setUpdateIntervalForType,
+  SensorTypes
+} from "react-native-sensors";
+import { map, filter } from "rxjs/operators";
 
 import { colors } from "~/styles";
 
@@ -26,15 +33,5 @@ class Maps extends Component {
     return <Map navigation={navigation} />;
   }
 }
-
-// const mapStateToProps = state => ({
-//   loading: state.maps.loading,
-//   faliure: state.maps.faliure,
-//   posts: state.maps.posts
-// });
-
-// const mapDispatchToProps = dispatch => bindActionCreators(MapTypes, dispatch);
-
-// export default connect(mapStateToProps, mapDispatchToProps)(Maps);
 
 export default Maps;
