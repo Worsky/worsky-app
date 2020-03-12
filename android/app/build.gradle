@@ -109,6 +109,7 @@ android {
         versionCode 1
         versionName "1.20.0"
         multiDexEnabled true
+        missingDimensionStrategy 'react-native-camera', 'general'
     }
     signingConfigs {
         release {
@@ -148,9 +149,18 @@ android {
             }
         }
     }
+
+    dexOptions {
+      javaMaxHeapSize "4g"
+    }
 }
 
 dependencies {
+    implementation project(':react-native-camera')
+    implementation project(':react-native-safe-area-context')
+    implementation project(':@react-native-community_masked-view')
+    implementation project(':@react-native-community_cameraroll')
+    implementation project(':@react-native-community_image-editor')
     implementation project(':@react-native-community_async-storage')
     implementation project(':react-native-screens')
     implementation project(':react-native-compass-heading')

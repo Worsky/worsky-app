@@ -3,13 +3,18 @@ package com.pilotobrasil;
 import android.app.Application;
 
 import com.facebook.react.ReactApplication;
+import org.reactnative.camera.RNCameraPackage;
+import com.th3rdwave.safeareacontext.SafeAreaContextPackage;
+import org.reactnative.maskedview.RNCMaskedViewPackage;
+import com.reactnativecommunity.cameraroll.CameraRollPackage;
+import com.reactnativecommunity.imageeditor.ImageEditorPackage;
 import com.reactnativecommunity.asyncstorage.AsyncStoragePackage;
 import com.swmansion.rnscreens.RNScreensPackage;
 import com.reactlibrary.CompassHeadingPackage;
 import com.geektime.rnonesignalandroid.ReactNativeOneSignalPackage;
 import com.reactnativecommunity.geolocation.GeolocationPackage;
 import com.reactnativecommunity.webview.RNCWebViewPackage;
-import com.agontuk.RNFusedLocation.RNFusedLocationPackage;
+import com.agontuk.RNFusedLocation.RNFusedLocationPackage;
 import com.mapbox.rctmgl.RCTMGLPackage;
 import io.invertase.firebase.RNFirebasePackage;
 import com.brentvatne.react.ReactVideoPackage;
@@ -38,13 +43,12 @@ public class MainApplication extends Application implements ReactApplication {
 
     @Override
     protected List<ReactPackage> getPackages() {
-      return Arrays.<ReactPackage>asList(new MainReactPackage(),
-            new AsyncStoragePackage(),
-            new RNScreensPackage(), new CompassHeadingPackage(),
-          new ReactNativeOneSignalPackage(), new GeolocationPackage(), new RNCWebViewPackage(),
-          new RNFusedLocationPackage(), new RNSensorsPackage(), new RCTMGLPackage(), new RNFirebasePackage(),
-          new ReactVideoPackage(), new ImagePickerPackage(), new ReanimatedPackage(), new TestFairyPackage(),
-          new VectorIconsPackage(), new RNGestureHandlerPackage());
+      return Arrays.<ReactPackage>asList(new MainReactPackage(), new RNCameraPackage(), new SafeAreaContextPackage(),
+          new RNCMaskedViewPackage(), new CameraRollPackage(), new ImageEditorPackage(), new AsyncStoragePackage(),
+          new RNScreensPackage(), new CompassHeadingPackage(), new ReactNativeOneSignalPackage(),
+          new GeolocationPackage(), new RNCWebViewPackage(), new RNFusedLocationPackage(), new RCTMGLPackage(),
+          new RNFirebasePackage(), new ReactVideoPackage(), new ImagePickerPackage(), new ReanimatedPackage(),
+          new TestFairyPackage(), new VectorIconsPackage(), new RNGestureHandlerPackage());
     }
 
     @Override

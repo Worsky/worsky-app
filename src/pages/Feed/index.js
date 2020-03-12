@@ -10,7 +10,8 @@ import {
   BackHandler,
   Platform,
   Image,
-  TouchableOpacity
+  TouchableOpacity,
+  PermissionsAndroid
 } from "react-native";
 import PropTypes from "prop-types";
 import Toast from "react-native-easy-toast";
@@ -110,6 +111,28 @@ class Feed extends Component {
           "hardwareBackPress",
           this.onBackButtonPressAndroid
         )
+    );
+
+    await PermissionsAndroid.request(
+      PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE,
+      {
+        title: "Read Store Permission",
+        message: "This app needs access to your files",
+        buttonNeutral: "Ask Me Later",
+        buttonNegative: "Cancel",
+        buttonPositive: "OK"
+      }
+    );
+
+    await PermissionsAndroid.request(
+      PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
+      {
+        title: "Write Store Permission",
+        message: "This app needs use your local storage",
+        buttonNeutral: "Ask Me Later",
+        buttonNegative: "Cancel",
+        buttonPositive: "OK"
+      }
     );
   }
 
@@ -222,10 +245,10 @@ class Feed extends Component {
                 <Icon name="times" style={styles.searchIcon} />
               </TouchableOpacity>
             ) : (
-              <View style={styles.iconContainer}>
-                <Icon name="search" style={styles.searchIcon} />
-              </View>
-            )}
+                <View style={styles.iconContainer}>
+                  <Icon name="search" style={styles.searchIcon} />
+                </View>
+              )}
             <Autocomplete
               data={result}
               onChangeText={search => {
@@ -250,9 +273,9 @@ class Feed extends Component {
               onFocus={() =>
                 String(search).length > 0
                   ? this.setState({
-                      hideResults: false,
-                      scrollEnabled: false
-                    })
+                    hideResults: false,
+                    scrollEnabled: false
+                  })
                   : this.setState({ scrollEnabled: true })
               }
               onBlur={() =>
@@ -274,18 +297,18 @@ class Feed extends Component {
                     text="Something went wrong, refresh please."
                   />
                 ) : (
-                  categories.map(category => (
-                    <FeedCategories
-                      key={category.point_type_id}
-                      category={{
-                        id: category.point_type_id,
-                        name: category.name,
-                        image: category.icon
-                      }}
-                      location={location}
-                    />
-                  ))
-                )}
+                      categories.map(category => (
+                        <FeedCategories
+                          key={category.point_type_id}
+                          category={{
+                            id: category.point_type_id,
+                            name: category.name,
+                            image: category.icon
+                          }}
+                          location={location}
+                        />
+                      ))
+                    )}
               </ScrollView>
             </View>
           </View>
@@ -301,14 +324,14 @@ class Feed extends Component {
             Something went wrong, refresh please.
           </Text>
         ) : (
-          <FlatList
-            data={posts}
-            keyExtractor={this._keyExtractor}
-            renderItem={this.feedItem}
-            onRefresh={this.refreshSimulator}
-            refreshing={refreshing}
-          />
-        )}
+              <FlatList
+                data={posts}
+                keyExtractor={this._keyExtractor}
+                renderItem={this.feedItem}
+                onRefresh={this.refreshSimulator}
+                refreshing={refreshing}
+              />
+            )}
       </ScrollView>
     );
   }

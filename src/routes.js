@@ -1,9 +1,10 @@
 import React from "react";
-import { StyleSheet, View, Image, Animated, Easing } from "react-native";
+import { StyleSheet, View, Image, Animated, Easing, Button, TouchableOpacity, Text } from "react-native";
+import Icon from 'react-native-vector-icons/MaterialIcons';
 import {
   createAppContainer,
   createStackNavigator,
-  createBottomTabNavigator
+  createBottomTabNavigator,
 } from "react-navigation";
 
 import {
@@ -32,11 +33,18 @@ import Category from "~/pages/Category";
 import Maps from "~/pages/Maps";
 import Notifications from "~/pages/Notifications";
 import Profile from "~/pages/Profile";
-import Publish from "~/pages/Publish";
+import Publish2 from "~/pages/Publish";
 import Airport from "~/pages/Airport";
 import PostDetails from "~/pages/PostDetails";
 import EditProfile from "~/pages/EditProfile";
 import SelectLocation from "~/pages/SelectLocation";
+
+import Gallery from "./pages/Gallery";
+import Photo from "./pages/Photo";
+import Video from "./pages/Video";
+import Publish from './components/Publish';
+import PublishPreview from './pages/PublishPreview';
+
 
 const styles = StyleSheet.create({
   profileIcon: {
@@ -73,6 +81,98 @@ const defineInitialRoute = (token, reportId, wizardDone) => {
   return "Login";
 };
 
+const feedTabNavigator = createBottomTabNavigator(
+  {
+    Gallery: {
+      screen: Gallery
+    },
+    Photo: {
+      screen: createStackNavigator(
+        {
+          Photo,
+          PublishPreview
+        },
+        {
+          defaultNavigationOptions: {
+            headerStyle: {
+              paddingBottom: 10,
+            },
+            headerTintColor: "#999",
+            headerTransparent: true,
+            headerRightContainerStyle: {
+              marginRight: 10,
+            },
+          },
+        }
+      ),
+      navigationOptions: () => {
+        return {
+          tabBarVisible: true,
+          tabBarIcon: () => (
+            <Icon
+              name="camera"
+              size={20}
+              color="#000"
+            />
+          ),
+        }
+      },
+    },
+    Video: {
+      screen: createStackNavigator(
+        {
+          Video,
+          PublishPreview
+        },
+        {
+          defaultNavigationOptions: {
+            headerStyle: {
+              paddingBottom: 10,
+            },
+            headerTintColor: "#999",
+            headerTransparent: true,
+            headerRightContainerStyle: {
+              marginRight: 10,
+            },
+          },
+        }
+      ),
+      navigationOptions: () => {
+        return {
+          tabBarVisible: true,
+          tabBarIcon: () => (
+            <Icon
+              name="videocam"
+              size={20}
+              color="#000"
+            />
+          ),
+        }
+      },
+    },
+    Publish: {
+      screen: Publish
+    }
+  },
+  {
+    initialRouteName: 'Photo',
+    resetOnBlur: true,
+    tabBarOptions: {
+      showIcon: true,
+      showLabel: false,
+      activeTintColor: colors.worSky.black,
+      inactiveTintColor: colors.worSky.black,
+      style: {
+        backgroundColor: colors.worSky.white
+      }
+    },
+    navigationOptions: () => ({
+      header: null,
+      tabBarVisible: false,
+    })
+  }
+)
+
 const tabNavigator = createBottomTabNavigator(
   {
     Feed: {
@@ -101,7 +201,7 @@ const tabNavigator = createBottomTabNavigator(
       }
     },
     Publish: {
-      screen: Publish,
+      screen: feedTabNavigator,
       navigationOptions: {
         tabBarIcon: () => (
           <View style={styles.profileIcon}>
@@ -110,6 +210,16 @@ const tabNavigator = createBottomTabNavigator(
         )
       }
     },
+    // Publish2: {
+    //   screen: Publish2,
+    //   navigationOptions: {
+    //     tabBarIcon: () => (
+    //       <View style={styles.profileIcon}>
+    //         <Image source={publish} style={styles.publishIconMenu} />
+    //       </View>
+    //     )
+    //   }
+    // },
     Notifications: {
       screen: Notifications,
       navigationOptions: {
@@ -136,6 +246,7 @@ const tabNavigator = createBottomTabNavigator(
     }
   },
   {
+    resetOnBlur: true,
     tabBarOptions: {
       showIcon: true,
       showLabel: false,
@@ -143,11 +254,14 @@ const tabNavigator = createBottomTabNavigator(
       inactiveTintColor: colors.worSky.black,
       style: {
         backgroundColor: colors.worSky.white
-      }
+      },
     },
-    navigationOptions: () => ({
-      header: null
-    })
+    navigationOptions: ({ navigation }) => {
+      return {
+        header: null,
+        tabBarVisible: false
+      }
+    }
   }
 );
 
@@ -230,7 +344,9 @@ const stackNavigator = (usersToken = false, reportId, wizardDone) =>
             header: null
           })
         },
-        Feed: tabNavigator
+        Feed: {
+          screen: tabNavigator
+        }
       },
       {
         initialRouteName: defineInitialRoute(usersToken, reportId, wizardDone),

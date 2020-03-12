@@ -2,7 +2,7 @@ import "./config/ReactotronConfig";
 import "./config/DevToolsConfig";
 
 import React, { Component } from "react";
-import { View, Platform } from "react-native";
+import { View, Platform, PermissionsAndroid } from "react-native";
 import AsyncStorage from "@react-native-community/async-storage";
 import { Provider } from "react-redux";
 import TestFairy from "react-native-testfairy";
@@ -23,7 +23,6 @@ export default class App extends Component {
     reportId: null,
     wizardDone: null
   };
-
   async componentWillMount() {
     const { token } = await getToken();
 
