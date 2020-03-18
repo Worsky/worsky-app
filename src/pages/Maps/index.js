@@ -1,82 +1,74 @@
-import React, { Component } from "react";
-import {
-  StatusBar,
-  Platform,
-  View,
-  TouchableOpacity,
-  Text,
-  StyleSheet
-} from "react-native";
+import React, { useEffect, useState, useRef } from "react";
+import { StatusBar, Platform, View, Text, Alert } from "react-native";
+import MapboxGL from "@react-native-mapbox-gl/maps";
+import Geolocation from "@react-native-community/geolocation";
 
 import { colors } from "~/styles";
 
-import MapJoel from "./Map1";
-import MapBruno from "./Map3";
+MapboxGL.setAccessToken(
+  "pk.eyJ1Ijoid29yc2t5IiwiYSI6ImNrN3dwb2xvMjA0ZDQza3FncDhnY3BocnkifQ.3s1eTwHlWIbhWjDiTfp2wQ"
+);
 
-class Maps extends Component {
-  state = {
-    witchMap: ""
-  };
+export default function Maps() {
+  const [currentPosition, setCurrentPosition] = useState({
+    latitude: 0,
+    longitute: 0
+  });
+  const refCamera = useRef(null);
 
-  componentDidMount() {
-    const { navigation } = this.props;
-
-    this._navListener = navigation.addListener("didFocus", () => {
-      Platform.OS != "ios"
-        ? StatusBar.setBackgroundColor(colors.worSky.white)
-        : null;
-      StatusBar.setBarStyle("dark-content");
-    });
-  }
-
-  componentWillUnmount() {
-    this._navListener.remove();
-  }
-
-  render() {
-    const { navigation } = this.props;
-    return (
-      <>
-        {!!!this.state.witchMap ? (
-          <>
-            <TouchableOpacity
-              onPress={() => this.setState({ witchMap: "joel" })}
-              style={styles.button}
-            >
-              <Text style={{ color: "white" }}>Joel</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={() => this.setState({ witchMap: "bruno" })}
-              style={styles.button}
-            >
-              <Text style={{ color: "white" }}>Bruno</Text>
-            </TouchableOpacity>
-          </>
-        ) : this.state.witchMap == "joel" ? (
-          <MapJoel navigation={navigation} />
-        ) : (
-          <MapBruno navigation={navigation} />
-        )}
-      </>
+  useEffect(() => {
+    Geolocation.watchPosition(
+      ({ coords }) => {
+        setCurrentPosition({
+          latitude: coords.latitude,
+          longitute: coords.longitude
+        });
+        refCamera.current.flyTo([coords.longitude, coords.latitude]);
+      },
+      error => Alert.alert(JSON.stringify(error))
     );
-  }
+  }, []);
+
+  return (
+    <View style={{ flex: 1 }}>
+      <MapboxGL.MapView style={{ flex: 1 }} styleURL={MapboxGL.StyleURL.Dark}>
+        <MapboxGL.Camera
+          followUserLocation
+          followUserMode={MapboxGL.UserTrackingModes.FollowWithCourse}
+          centerCoordinate={[
+            currentPosition.longitute,
+            currentPosition.latitude
+          ]}
+          zoomLevel={15}
+          ref={refCamera}
+        />
+        <MapboxGL.UserLocation />
+      </MapboxGL.MapView>
+      <Text>{JSON.stringify({ ...currentPosition })}</Text>
+    </View>
+  );
 }
 
-const styles = StyleSheet.create({
-  main: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center"
-  },
+// class Maps extends Component {
+//   componentDidMount() {
+//     const { navigation } = this.props;
 
-  button: {
-    marginBottom: 10,
-    width: 200,
-    paddingVertical: 25,
-    backgroundColor: "grey",
-    justifyContent: "center",
-    alignItems: "center"
-  }
-});
+//     this._navListener = navigation.addListener("didFocus", () => {
+//       Platform.OS != "ios"
+//         ? StatusBar.setBackgroundColor(colors.worSky.white)
+//         : null;
+//       StatusBar.setBarStyle("dark-content");
+//     });
+//   }
 
-export default Maps;
+//   componentWillUnmount() {
+//     this._navListener.remove();
+//   }
+
+//   render() {
+//     const { navigation } = this.props;
+//     return <View />;
+//   }
+// }
+
+// export default Maps;
