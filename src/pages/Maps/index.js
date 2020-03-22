@@ -10,24 +10,35 @@ MapboxGL.setAccessToken(
 );
 
 export default function Maps() {
-  const [currentPosition, setCurrentPosition] = useState({
-    latitude: 0,
-    longitute: 0
-  });
+  const [currentPosition, setCurrentPosition] = useState({});
   const refCamera = useRef(null);
+  // let watchID = null;
 
-  useEffect(() => {
-    Geolocation.watchPosition(
-      ({ coords }) => {
-        setCurrentPosition({
-          latitude: coords.latitude,
-          longitute: coords.longitude
-        });
-        refCamera.current.flyTo([coords.longitude, coords.latitude]);
-      },
-      error => Alert.alert(JSON.stringify(error))
-    );
-  }, []);
+  // useEffect(() => {
+  //   watchID = Geolocation.watchPosition(
+  //     ({ coords }) => {
+  //       setCurrentPosition({
+  //         latitude: coords.latitude,
+  //         longitute: coords.longitude
+  //       });
+  //     },
+  //     error => Alert.alert(JSON.stringify(error)),
+  //     {
+  //       timeout: 3000,
+  //       maximumAge: 0,
+  //       distanceFilter: 2,
+  //       useSignificantChanges: true
+  //     }
+  //   );
+  // }, []);
+
+  // useEffect(() => {
+  //   if (currentPosition.hasOwnProperty("latitude"))
+  //     refCamera.current.flyTo([
+  //       currentPosition.longitude,
+  //       currentPosition.latitude
+  //     ]);
+  // }, [currentPosition]);
 
   return (
     <View style={{ flex: 1 }}>
@@ -42,33 +53,17 @@ export default function Maps() {
           zoomLevel={15}
           ref={refCamera}
         />
-        <MapboxGL.UserLocation />
+        <MapboxGL.UserLocation
+          onUpdate={({ coords }) => {
+            setCurrentPosition({
+              latitude: coords.latitude,
+              longitute: coords.longitude
+            });
+            refCamera.current.flyTo([coords.longitude, coords.latitude]);
+          }}
+        />
       </MapboxGL.MapView>
       <Text>{JSON.stringify({ ...currentPosition })}</Text>
     </View>
   );
 }
-
-// class Maps extends Component {
-//   componentDidMount() {
-//     const { navigation } = this.props;
-
-//     this._navListener = navigation.addListener("didFocus", () => {
-//       Platform.OS != "ios"
-//         ? StatusBar.setBackgroundColor(colors.worSky.white)
-//         : null;
-//       StatusBar.setBarStyle("dark-content");
-//     });
-//   }
-
-//   componentWillUnmount() {
-//     this._navListener.remove();
-//   }
-
-//   render() {
-//     const { navigation } = this.props;
-//     return <View />;
-//   }
-// }
-
-// export default Maps;
