@@ -34,12 +34,12 @@ MapboxGL.setAccessToken(
   "pk.eyJ1Ijoid29yc2t5IiwiYSI6ImNrN3dwb2xvMjA0ZDQza3FncDhnY3BocnkifQ.3s1eTwHlWIbhWjDiTfp2wQ"
 );
 
-export default function Maps() {
+export default function Maps({ navigation }) {
   const [currentPosition, setCurrentPosition] = useState({});
   const [speed, setSpeed] = useState(0);
   const [altitude, setAltitude] = useState(0);
   const [heading, setHeading] = useState(0);
-  const [follow, setFollow] = useState(false);
+  const [follow, setFollow] = useState(true);
   const [search, setSearch] = useState("");
   const [searchResult, setSearchResult] = useState([]);
   const [filterModalVisible, setFilterModalVisible] = useState(false);
@@ -69,7 +69,7 @@ export default function Maps() {
     try {
       if (follow) setFollow(false);
 
-      await mapCamera.moveTo(
+      await refCamera.current.moveTo(
         [userPosition.longitude, userPosition.latitude],
         1200
       );
@@ -86,11 +86,10 @@ export default function Maps() {
     setSpeed(coords.speed);
 
     if (follow) {
-      setCurrentPosition({
-        latitude: coords.latitude,
-        longitute: coords.longitude
-      });
-
+      // setCurrentPosition({
+      //   latitude: coords.latitude,
+      //   longitute: coords.longitude
+      // });
       refCamera.current.flyTo([coords.longitude, coords.latitude]);
     }
   };
@@ -194,17 +193,15 @@ export default function Maps() {
 
   const mapCenterOnPoint = async point => {
     try {
-      if (!mapLoaded) return;
-
-      const goToCoords = [
+      const goTo = [
         Number(point.point_type.longitude || point.longitude),
         Number(point.point_type.latitude || point.latitude)
       ];
 
       if (refCamera) {
-        await setFollow(false);
+        if (follow) await setFollow(false);
 
-        await refCamera.moveTo(goToCoords, 1200);
+        await refCamera.current.moveTo(goTo, 1200);
       } else {
         handleNavigation(point);
       }
@@ -213,7 +210,7 @@ export default function Maps() {
     }
   };
 
-  const cleanSearchAndCenterMap = point => {
+  const cleanSearchAndCenterMap = async point => {
     setSearch("");
 
     setSearchResult([]);
@@ -228,7 +225,6 @@ export default function Maps() {
       point_type: { entity },
       entity_id: id
     } = post;
-    const { navigation } = props;
 
     let destination;
     let params;
@@ -258,6 +254,11 @@ export default function Maps() {
       : false;
   };
 
+  const cleanField = () => {
+    setResult([]);
+    setSearch("");
+  };
+
   useEffect(() => {
     CompassHeading.start(3, degree => {
       setHeading(degree);
@@ -274,13 +275,15 @@ export default function Maps() {
     <View style={{ flex: 1 }}>
       <MapboxGL.MapView
         style={{ flex: 1 }}
-        styleURL={MapboxGL.StyleURL.Dark}
+        styleURL={MapboxGL.StyleURL.Light}
+        logoEnabled={false}
+        attributionEnabled={false}
         ref={refMapView}
         onPress={cleanSearchAndCenterMap}
         onRegionDidChange={onRegionDidChanges}
       >
         <MapboxGL.Camera
-          followUserLocation
+          followUserLocation={follow}
           followUserMode={MapboxGL.UserTrackingModes.FollowWithHeading}
           centerCoordinate={[
             currentPosition.longitute,
@@ -288,6 +291,7 @@ export default function Maps() {
           ]}
           zoomLevel={15}
           ref={refCamera}
+          heading={heading}
         />
 
         <MapMarker points={points} openInfoModal={openInfoModal} />
