@@ -15,7 +15,7 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: "row",
     position: "absolute",
-    zIndex: 99,
+    // zIndex: 99,
     padding: metrics.basePadding / 2,
     justifyContent: "space-between",
     alignItems: "center",
@@ -26,7 +26,7 @@ const styles = StyleSheet.create({
         paddingTop: 35
       },
       android: {
-        paddingRight: 40
+        // paddingRight: 20
       }
     })
   },
@@ -51,18 +51,18 @@ const styles = StyleSheet.create({
   },
 
   filterIconContainer: {
-    height: "100%",
-    width: 30,
-    height: 20,
-    marginTop: 20,
-    textAlign: "center"
+    width: 60,
+    height: 40,
+    marginTop: 10,
+    justifyContent: "center",
+    alignItems: "center"
   },
 
   autocomplete: {
     height: Platform.OS == "ios" ? 30 : 35,
     width: metrics.width - 80,
     marginTop: metrics.baseMargin,
-    backgroundColor: colors.worSky.grey,
+    backgroundColor: colors.worSky.lighter,
     borderRadius: metrics.baseRadius * 6,
     textAlign: "center",
     paddingHorizontal: 20,
@@ -74,7 +74,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     left: 4,
     right: 4,
-    top: 100,
+    top: 70,
     backgroundColor: "transparent",
     flex: 1,
     flexDirection: "row",
@@ -103,6 +103,7 @@ const styles = StyleSheet.create({
   },
 
   myPositionButton: {
+    flex: 1,
     position: "absolute",
     right: 8,
     bottom: 5,
@@ -110,9 +111,14 @@ const styles = StyleSheet.create({
     height: 50,
     borderRadius: 25,
     backgroundColor: "white",
-    borderColor: "rgba(0,0,0,0.5)",
-    borderWidth: 1,
-    flex: 1,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 5
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
     justifyContent: "center",
     alignItems: "center"
   },
@@ -138,52 +144,6 @@ const styles = StyleSheet.create({
     top: "50%",
     left: "50%",
     transform: [{ translateX: -32 }, { translateY: -32 }]
-  },
-
-  filterIcon: {},
-
-  filterLabel: {
-    paddingHorizontal: 16
-  },
-
-  checkboxForm: {
-    flex: 1,
-    flexDirection: "column",
-    alignContent: "flex-start",
-    height: 260
-  },
-
-  checkboxField: {
-    flex: 1,
-    flexDirection: "row",
-    // height: 60,
-    alignItems: "center"
-  },
-  moreDetailButton: {
-    width: "100%",
-    alignContent: "center",
-    justifyContent: "center",
-    height: 40,
-    backgroundColor: colors.worSky.blue,
-    borderRadius: 8
-  },
-
-  moreDetailButtonText: {
-    color: colors.worSky.white,
-    textAlign: "center"
-  },
-
-  annotationContainer: {
-    width: 30,
-    height: 30,
-    alignItems: "center",
-    justifyContent: "center",
-    borderRadius: 15
-  },
-
-  annotationFill: {
-    width: 30,
-    height: 30
   }
 });
 

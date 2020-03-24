@@ -1,24 +1,24 @@
-import React from "react";
+import React, { useEffect, memo, useMemo } from "react";
 import MapboxGL from "@react-native-mapbox-gl/maps";
 import PropTypes from "prop-types";
 
-const MapMarker = ({ posts, openInfoModal }) => {
+function MapMarker({ points, openInfoModal, icons }) {
   const buildFeatureCollection = {
     type: "FeatureCollection",
-    features: posts.map(post => ({
+    features: points.map(post => ({
       type: "Feature",
       geometry: {
         type: "Point",
         coordinates: [Number(post.longitude), Number(post.latitude)]
       },
       properties: {
-        icon: post.point_type.name,
+        icon: post.name,
         post
       }
     }))
   };
 
-  const orderCategories = posts.map(({ point_type }) => ({
+  const orderCategories = icons.map(point_type => ({
     [point_type.name]: {
       uri: point_type.icon
     }
@@ -30,14 +30,17 @@ const MapMarker = ({ posts, openInfoModal }) => {
     category => (reorderCategories = { ...reorderCategories, ...category })
   );
 
-  const layerStyle = {
-    iconImage: ["get", "icon"],
-    iconSize: 0.06,
-    iconOpacity: 1,
-    iconAllowOverlap: true,
-    iconIgnorePlacement: true,
-    symbolSpacing: 350
-  };
+  const layerStyle = useMemo(
+    () => ({
+      iconImage: ["get", "icon"],
+      iconSize: 0.06,
+      iconOpacity: 1,
+      iconAllowOverlap: true,
+      iconIgnorePlacement: true,
+      symbolSpacing: 350
+    }),
+    []
+  );
 
   return (
     <>
@@ -54,11 +57,11 @@ const MapMarker = ({ posts, openInfoModal }) => {
       </MapboxGL.ShapeSource>
     </>
   );
-};
+}
 
 MapMarker.propTypes = {
-  posts: PropTypes.array.isRequired,
+  points: PropTypes.array.isRequired,
   openInfoModal: PropTypes.func.isRequired
 };
 
-export default MapMarker;
+export default memo(MapMarker);

@@ -15,7 +15,6 @@ import com.geektime.rnonesignalandroid.ReactNativeOneSignalPackage;
 import com.reactnativecommunity.geolocation.GeolocationPackage;
 import com.reactnativecommunity.webview.RNCWebViewPackage;
 import com.agontuk.RNFusedLocation.RNFusedLocationPackage;
-import com.mapbox.rctmgl.RCTMGLPackage;
 import io.invertase.firebase.RNFirebasePackage;
 import com.brentvatne.react.ReactVideoPackage;
 
@@ -29,6 +28,7 @@ import com.facebook.react.ReactNativeHost;
 import com.facebook.react.ReactPackage;
 import com.facebook.react.shell.MainReactPackage;
 import com.facebook.soloader.SoLoader;
+import com.mapbox.rctmgl.RCTMGLPackage;
 
 import java.util.Arrays;
 import java.util.List;

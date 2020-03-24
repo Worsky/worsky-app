@@ -2,10 +2,13 @@ import { apiURLToken } from "~/services/api";
 import { getToken } from "~/services/asyncStorageToken";
 
 const api = {
-  loadCategories: async () => {
+  loadCategories: async () =>
+    apiURLToken((await getToken()).token).get("/point-type"),
+
+  loadIcons: async () => {
     const { token } = await getToken();
-    console.log({ token });
-    return apiURLToken(token).get("/point-type");
+
+    return await apiURLToken(token).get("/v2/entity");
   },
 
   loadPosts: async (
@@ -24,10 +27,10 @@ const api = {
     params.append("lat2", latitude2);
     params.append("lng2", longitude2);
     params.append("zoom", Math.round(zoom));
-    params.append("point_type_id", point_type_id);
+    if (point_type_id) params.append("point_type_id", point_type_id);
 
     const callUrl = `/map/nearby?${params.toString()}`;
-    console.log({ callUrl });
+
     return apiURLToken(token).get(callUrl, {});
   },
 
