@@ -2,10 +2,10 @@ import React from "react";
 import MapboxGL from "@react-native-mapbox-gl/maps";
 import PropTypes from "prop-types";
 
-const MapMarker = ({ posts, openInfoModal }) => {
+const MapMarker = ({ points, openInfoModal }) => {
   const buildFeatureCollection = {
     type: "FeatureCollection",
-    features: posts.map(post => ({
+    features: points.map(post => ({
       type: "Feature",
       geometry: {
         type: "Point",
@@ -18,7 +18,7 @@ const MapMarker = ({ posts, openInfoModal }) => {
     }))
   };
 
-  const orderCategories = posts.map(({ point_type }) => ({
+  const orderCategories = points.map(({ point_type }) => ({
     [point_type.name]: {
       uri: point_type.icon
     }
@@ -57,7 +57,7 @@ const MapMarker = ({ posts, openInfoModal }) => {
 };
 
 MapMarker.propTypes = {
-  posts: PropTypes.array.isRequired,
+  points: PropTypes.array.isRequired,
   openInfoModal: PropTypes.func.isRequired
 };
 

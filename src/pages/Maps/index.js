@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
-import { StatusBar, Platform, View, Alert } from "react-native";
+import { StatusBar, Platform, View, Keyboard } from "react-native";
 import MapboxGL from "@react-native-mapbox-gl/maps";
 import Geolocation from "@react-native-community/geolocation";
 import CompassHeading from "react-native-compass-heading";
@@ -9,6 +9,7 @@ import AutocompleteItem from "~/components/AutocompleteItem";
 import CustomModal from "~/components/CustomModal";
 import MapTool from "~components/MapTool";
 import MapFilterModalContent from "~/components/MapFilterModalContent";
+import MapMarker from "~/components/MapMarker";
 
 import { plane } from "~/assets";
 
@@ -17,6 +18,7 @@ import {
   errorMarginToDisplayTargetIcon
 } from "./helpers";
 import styles from "./styles";
+import api from "./api";
 
 MapboxGL.setAccessToken(
   "pk.eyJ1Ijoid29yc2t5IiwiYSI6ImNrN3dwb2xvMjA0ZDQza3FncDhnY3BocnkifQ.3s1eTwHlWIbhWjDiTfp2wQ"
@@ -33,6 +35,8 @@ export default function Maps() {
   const [filterModalVisible, setFilterModalVisible] = useState(false);
   const [filters, setFilters] = useState({ all: true });
   const [categories, setCategories] = useState([]);
+  const [points, setPoints] = useState([]);
+  const [infoPoint, setInfoPoint] = useState({});
 
   const refCamera = useRef(null);
   const refMapView = useRef(null);
@@ -45,7 +49,7 @@ export default function Maps() {
 
     const [longitude, latitude] = await refMapView.getCenter();
 
-    const { data:response } = await api.loadSearch(data, latitude, longitude);
+    const { data: response } = await api.loadSearch(data, latitude, longitude);
 
     setSearchResult(response.data);
   };
@@ -98,6 +102,111 @@ export default function Maps() {
     if (!follow) handleMapPan();
   };
 
+  const toggleFilter = (id, value) => {
+    let newFilters = JSON.parse(JSON.stringify(filters));
+
+    if (id === "all") {
+      newFilters.all = value;
+
+      for (cat of categories) newFilters[`point${cat.point_type_id}`] = value;
+    } else {
+      newFilters[`point${id}`] = value;
+
+      const keys = Object.keys(newFilters).filter(k => k !== "all");
+
+      newFilters.all = true;
+
+      if (keys.map(k => newFilters[k]).includes(false)) newFilters.all = false;
+    }
+
+    setFilters(newFilters);
+  };
+
+  const handleInitialDatas = async () => {
+    await dispatchAndVerifyPermissions();
+
+    const { data: response } = await api.loadCategories();
+
+    setCategories(response.data);
+
+    let newFilters = { all: true };
+
+    for (category of response.data)
+      newFilters[`point${category.point_type_id}`] = true;
+
+    setFilters(newFilters);
+  };
+
+  const handleMapPan = async () => {
+    try {
+      const [[lng1, lat1], [lng2, lat2]] = await mapView.getVisibleBounds();
+      const zoom = await mapView.getZoom();
+
+      let pointIds = Object.keys(filters)
+        .filter(k => k !== "all" && filters[k] === true)
+        .map(key => key.replace("point", ""))
+        .join(",");
+
+      if (filters.all === true)
+        pointIds = Object.keys(filters)
+          .filter(k => k !== "all")
+          .map(key => key.replace("point", ""))
+          .join(",");
+
+      const { data: response } = await api.loadPosts(
+        lat1,
+        lng1,
+        lat2,
+        lng2,
+        zoom,
+        pointIds
+      );
+
+      setPoints(response.data);
+    } catch (error) {
+      return error;
+    }
+  };
+
+  const openInfoModal = point => {
+    setInfoPoint(point);
+
+    setInfoModalVisible(true);
+
+    mapCenterOnPoint(point);
+  };
+
+  const mapCenterOnPoint = async point => {
+    try {
+      if (!mapLoaded) return;
+
+      const goToCoords = [
+        Number(point.point_type.longitude || point.longitude),
+        Number(point.point_type.latitude || point.latitude)
+      ];
+
+      // if (refCamera) {
+      await setFollow(false);
+
+      await refCamera.moveTo(goToCoords, 1200);
+      // } else {
+      //   handleNavigation(point);
+      // }
+    } catch (error) {
+      return error;
+    }
+  };
+
+  const cleanSearchAndCenterMap = point => {
+    setSearch("");
+
+    setResult([]);
+
+    Keyboard.dismiss();
+
+    mapCenterOnPoint(point);
+  };
+
   useEffect(() => {
     // Geolocation.watchPosition(
     //   ({ coords }) => {
@@ -114,20 +223,12 @@ export default function Maps() {
     //     useSignificantChanges: true
     //   }
     // );
-    dispatchAndVerifyPermissions();
 
     CompassHeading.start(3, degree => {
       setHeading(degree);
     });
 
-    const { data: response } = await api.loadCategories();
-
-    let newFilters = { all: true };
-
-    for (category of response.data)
-      newFilters[`point${category.point_type_id}`] = true;
-
-    setFilters(newFilters);
+    handleInitialDatas();
   }, []);
 
   return (
@@ -136,7 +237,7 @@ export default function Maps() {
         style={{ flex: 1 }}
         styleURL={MapboxGL.StyleURL.Dark}
         ref={refMapView}
-        // onPress={cleanSearchAndCenterMap}
+        onPress={cleanSearchAndCenterMap}
         onRegionDidChange={onRegionDidChanges}
       >
         <MapboxGL.Camera
@@ -149,6 +250,9 @@ export default function Maps() {
           zoomLevel={15}
           ref={refCamera}
         />
+
+        <MapMarker points={points} openInfoModal={openInfoModal} />
+
         <MapboxGL.UserLocation onUpdate={handleCenterPosition} />
       </MapboxGL.MapView>
 
@@ -218,21 +322,20 @@ export default function Maps() {
           close={true}
         />
       </View>
-      {infoPoint && (
-        <CustomModal
-          close={false}
-          visible={infoModalVisible}
-          changeVisibility={() => setInfoModalVisible(false)}
-          content={
-            <MoreInfoModalContent
-              infoPoint={infoPoint}
-              closeModal={setInfoModalVisible}
-              handleNavigation={handleNavigation}
-            />
-          }
-        />
-      )}
-    </View>
+      {/* {infoPoint && ( */}
+      <CustomModal
+        close={false}
+        visible={infoModalVisible}
+        changeVisibility={() => setInfoModalVisible(false)}
+        content={
+          <MoreInfoModalContent
+            infoPoint={infoPoint}
+            closeModal={setInfoModalVisible}
+            handleNavigation={mapCenterOnPoint}
+          />
+        }
+      />
+      {/* )} */}
     </View>
   );
 }
