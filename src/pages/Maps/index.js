@@ -91,6 +91,8 @@ export default function Maps({ navigation }) {
         latitude: coords.latitude,
         longitute: coords.longitude
       });
+
+      refCamera.current.flyTo(coords.longitude, coords.latitude);
     }
   };
 
