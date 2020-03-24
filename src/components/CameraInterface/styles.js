@@ -32,6 +32,10 @@ const styles = StyleSheet.create({
     borderColor: "#e1e4e8",
     borderRadius: 100
   },
+  timer: {
+    alignItems: 'center',
+    marginBottom: 20
+  },
   buttonIcon: {
     backgroundColor: "white",
     width: 60,
@@ -42,7 +46,8 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "white",
     flexDirection: "row",
-    justifyContent: "center"
+    justifyContent: "center",
+    alignItems: "center"
   }
 });
 

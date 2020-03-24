@@ -27,8 +27,8 @@ const AutocompleteItem = ({
         handleClick
           ? handleClick(item)
           : navigation
-          ? handleClick(navigation, cleanField, item)
-          : callbackCoordinate(
+            ? handleClick(navigation, cleanField, item)
+            : callbackCoordinate(
               item.point_type.latitude,
               item.point_type.longitude,
               item.name,

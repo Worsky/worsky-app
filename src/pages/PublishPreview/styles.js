@@ -12,6 +12,7 @@ const styles = StyleSheet.create({
     flex: 1,
     alignContent: "center",
     marginTop: 45,
+    // opacity: 0.25
   },
   container: {
     flex: 1,
@@ -36,6 +37,14 @@ const styles = StyleSheet.create({
     fontSize: 40,
     color: "white"
   },
+  uploadIcon: {
+    // width: 80,
+    // height: 80,
+    // resizeMode: "contain"
+  },
+  loadMedia: {
+    position: "absolute"
+  }
 });
 
 export default styles;

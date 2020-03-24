@@ -2,7 +2,7 @@ import { Platform } from "react-native";
 import { put, call } from "redux-saga/effects";
 
 import { navigate } from "~/services/navigation";
-import { apiURLToken } from "~/services/api";
+import { apiURLToken, apiURLTokenV2 } from "~/services/api";
 import { getToken } from "~/services/asyncStorageToken";
 
 import { Creators as PublishActions } from "../ducks/publish";
@@ -32,18 +32,23 @@ export function* uploadAndroidImage(action) {
     const file = {
       name: media.uri.split("/").slice(-1)[0],
       type: media.type || "image/jpeg",
-      uri: media.uri.replace("file://", "")
+      uri: media.uri,
+      // uri: media.uri.replace("file://", "")
     };
 
     data.append("media", file);
 
-    const response = yield call(apiURLToken(token).post, "/report/media", data);
+    const response = yield call(apiURLTokenV2(token).post, "/report/media", data);
+
+    console.log(response);
 
     if (!response.data.success)
       return yield put(PublishActions.sendDone(response.data.success));
 
     return yield put(PublishActions.sendDone(response.data.data.path));
   } catch (error) {
+    // console.log({ error });
+
     return yield put(PublishActions.sendDone(false));
   }
 }
@@ -63,7 +68,7 @@ export function* uploadAndroidVideo(action) {
 
     data.append("media", file);
 
-    const response = yield call(apiURLToken(token).post, "/report/media", data);
+    const response = yield call(apiURLTokenV2(token).post, "/report/media", data);
 
     if (!response.data.success)
       return yield put(PublishActions.sendDone(response.data.success));
@@ -99,7 +104,7 @@ export function* uploadIosImage(action) {
 
     data.append("media", file);
 
-    const response = yield call(apiURLToken(token).post, "/report/media", data);
+    const response = yield call(apiURLTokenV2(token).post, "/report/media", data);
 
     if (!response.data.success)
       return yield put(PublishActions.sendDone(response.data.success));
@@ -136,7 +141,7 @@ export function* uploadIosVideo(action) {
 
     data.append("media", file);
 
-    const response = yield call(apiURLToken(token).post, "/report/media", data);
+    const response = yield call(apiURLTokenV2(token).post, "/report/media", data);
 
     if (!response.data.success)
       return yield put(PublishActions.sendDone(response.data.success));
@@ -167,7 +172,7 @@ export function* publshNow(action) {
     if (description) data.append("description", description);
     if (mediaUrl) data.append("media_url", mediaUrl);
 
-    const response = yield call(apiURLToken(token).post, "/report", data);
+    const response = yield call(apiURLTokenV2(token).post, "/report", data);
 
     if (!response.data.success)
       return yield put(PublishActions.publishFaliure());
@@ -178,6 +183,8 @@ export function* publshNow(action) {
       toastMessage: "Your report has been sended successfuly!"
     });
   } catch (error) {
+    console.log({ error });
+
     return yield put(PublishActions.publishFaliure());
   }
 }

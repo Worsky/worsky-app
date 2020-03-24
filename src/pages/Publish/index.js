@@ -149,6 +149,9 @@ class Publish extends Component {
 
       if (Platform.OS == "ios") return uploadIosImage(upload);
 
+      console.log(upload);
+
+
       return uploadAndroidImage(upload);
     });
   };

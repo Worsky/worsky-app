@@ -1,18 +1,42 @@
 import React, { useState } from 'react';
-import { View, Image, Text, TouchableWithoutFeedback } from 'react-native';
+import { useDispatch, useSelector } from 'react-redux';
+import { View, Image, Text, TouchableWithoutFeedback, ActivityIndicator } from 'react-native';
 import Video from "react-native-video";
 import Icon from "react-native-vector-icons/FontAwesome";
 
+import { Creators as PublishActions } from "~/store/ducks/publish";
+
 import styles from "./styles";
+import { colors } from "~/styles";
+
 
 export default function PublishPreview({ navigation }) {
+  const dispatch = useDispatch();
+  const loadButton = useSelector(state => state.publish.loadButton);
+  const loadMedia = useSelector(state => state.publish.loadMedia);
+  const faliure = useSelector(state => state.publish.faliure);
+
   const { state: { params } } = navigation;
   const [paused, setPaused] = useState(false);
+  const [visible, setVisible] = useState(true);
 
-  handleFunction = navigation => {
+  handleFunction = async navigation => {
+    setVisible(false);
     const { state: { params } } = navigation;
 
-    navigation.navigate('Publish', { response: params.response, mediaType: params.mediaType });
+    await handleMediaUrl(params.response, params.mediaType);
+
+
+    if (!faliure)
+      navigation.navigate('Publish', { response: params.response, mediaType: params.mediaType });
+  }
+
+  handleMediaUrl = async (media, mediaType) => {
+    if (mediaType === "video") {
+      return dispatch(PublishActions.uploadAndroidVideo(media));
+    }
+
+    return dispatch(PublishActions.uploadAndroidImage(media));
   }
 
   return (
@@ -40,8 +64,9 @@ export default function PublishPreview({ navigation }) {
           </TouchableWithoutFeedback>
         </View>
         :
-        <Image source={{ uri: params.response.uri }} style={styles.preview} />
+        <Image source={{ uri: params.response.uri }} style={[styles.preview, styles.uploadIcon]} />
       }
+      {loadMedia && <ActivityIndicator color={colors.worSky.white} style={styles.loadMedia} />}
     </View>
   );
 }

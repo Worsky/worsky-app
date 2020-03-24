@@ -6,7 +6,8 @@ import {
   TouchableOpacity,
   Image,
   Alert,
-  Platform
+  Platform,
+  Keyboard
 } from 'react-native';
 import { CustomPicker } from "react-native-custom-picker";
 import MapboxGL from "@react-native-mapbox-gl/maps";
@@ -18,6 +19,7 @@ import { bindActionCreators } from "redux";
 import { connect } from "react-redux";
 
 import { Creators as PublishActions } from "~/store/ducks/publish";
+import { Creators as PublishTypes } from "~/store/ducks/publish";
 import { Creators as searchActions } from "~/store/ducks/search";
 
 import CameraRollHeader from "~/components/CameraRollHeader";
@@ -36,7 +38,6 @@ MapboxGL.setAccessToken(
   "sk.eyJ1Ijoiam9lbGJhbnphdHRvIiwiYSI6ImNrNDk2cmkzNzAwdHkzZHMyY2x2ZGh0eXYifQ.EeAfcaGLuGKv0FV90GT27g"
 );
 
-// export default function Publish({ navigation }) {
 class Publish extends Component {
   state = {
     entity_id: null,
@@ -62,13 +63,13 @@ class Publish extends Component {
     infoModalVisible: false,
     mapLoaded: false,
     filters: { all: true },
-    posts: []
+    posts: [],
+    userId: 1,
   };
 
   handleMapPan = async () => {
     try {
       const { mapLoaded, mapView, filters } = this.state;
-      console.log('apiResponse');
 
       if (!mapLoaded) return;
 
@@ -95,41 +96,63 @@ class Publish extends Component {
         pointIds
       );
 
-      console.log(apiResponse);
-
-
       this.setState({ posts: apiResponse.data.data })
     } catch (error) {
       return error;
     }
   };
 
-  handleFunction = () => {
+  handlePublish = async () => {
+    const { publishNow } = this.props;
 
-    Alert.alert(
-      'Publish',
-      'You will publish this now, are you sure?',
-      [
-        {
-          text: 'Cancel',
-          onPress: () => { },
-          style: 'cancel',
-        },
-        { text: 'OK', onPress: () => { } },
-      ],
-      { cancelable: false },
+    const {
+      description,
+      entity_id,
+      userId,
+      location,
+      preview,
+      image
+    } = this.state;
+    console.log(image);
+
+    const media = await this.handleMediaUrl(image);
+
+
+    const response = await publishNow(
+      location.latitude,
+      location.longitude,
+      description,
+      media,
+      entity_id,
+      userId
     );
+
+    this.cleanState()
+  };
+
+  handleMediaUrl = async media => {
+    console.log(media);
+
+    const { mediaType } = this.state
+    const { uploadAndroidImage, uploadAndroidVideo } = this.props;
+    // const { uri } = preview;
+
+    if (mediaType === "video") {
+      return await uploadAndroidVideo(media)
+    }
+
+    return await uploadAndroidImage(media);
   }
 
   renderAutocomplete = ({ item }) => {
-
     const { navigation } = this.props;
 
     return (
       <AutocompleteItem
         item={item}
-        navigation={navigation}
+        // navigation={navigation}
         cleanField={() => this.setState({ search: "" })}
+        handleClick={(item) => this.cleanSearchAndCenterMap(item)}
       />
     );
   };
@@ -156,14 +179,6 @@ class Publish extends Component {
     const { reportTypes } = this.props;
 
     if (entity_id === null) {
-      // return (
-      //   <View style={styles.pickerFieldContainer}>
-      //     <Text style={styles.pickerFieldText}>Categories</Text>
-      //     <View style={styles.pickerFieldIconContainer}>
-      //       <IconAw name="chevron-down" style={styles.pickerFieldIcon} />
-      //     </View>
-      //   </View>
-      // );
       return (
         <View style={styles.pickerFieldContainer}>
           <Text>Categories</Text>
@@ -205,13 +220,17 @@ class Publish extends Component {
   loadSearch = async (search, lat, lng) => {
     const { loadSearch } = this.props;
 
-    await loadSearch(search, lat, lng);
+    loadSearch(search, lat, lng);
+
     this.setState({ search, hideResults: false });
   };
 
   handleUserPosition = async () => {
     Geolocation.watchPosition(
-      position => this.setState({ userPosition: position.coords }),
+      position => this.setState({
+        userPosition: position.coords,
+        location: { latitude: position.coords.latitude, longitude: position.coords.longitude }
+      }),
       error => Alert.alert(error.message),
       { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
     );
@@ -234,8 +253,28 @@ class Publish extends Component {
     this.mapCenterOnPoint(point);
   };
 
+  cleanSearchAndCenterMap = point => {
+    const { point_type } = point;
+    const location = {
+      latitude: point_type.latitude,
+      longitude: point_type.longitude
+    }
+
+    this.setState({
+      search: "",
+      location
+    });
+
+    // setSearch("");
+    // setResult([]);
+    Keyboard.dismiss();
+    this.mapCenterOnPoint(point);
+  };
+
   mapCenterOnPoint = async point => {
     try {
+      const { mapLoaded, mapCamera } = this.state;
+
       if (!mapLoaded) return;
 
       const goToCoords = [
@@ -244,7 +283,7 @@ class Publish extends Component {
       ];
 
       if (mapCamera) {
-        await setFollow(false);
+        await this.setState({ follow: false })
 
         await mapCamera.flyTo(goToCoords);
       } else {
@@ -253,6 +292,19 @@ class Publish extends Component {
     } catch (error) {
       return error;
     }
+  };
+
+  cleanState = () => {
+    this.setState({
+      description: "",
+      entity_id: null,
+      image: {},
+      preview: null,
+      location: {
+        latitude: 0,
+        longitude: 0
+      }
+    })
   };
 
   async componentWillMount() {
@@ -267,12 +319,6 @@ class Publish extends Component {
       })
     }
 
-    this.setState({
-      description: "",
-      entity_id: null,
-      preview: null
-    })
-
     const { loadReportTypes } = this.props;
 
     await loadReportTypes();
@@ -282,11 +328,14 @@ class Publish extends Component {
     this.handleUserPosition();
   }
 
+  componentWillUnmount() {
+    this.cleanState();
+  }
+
   render() {
-    const { follow, description, search, hideResults, location, mapCamera, mapView, posts } = this.state
+    const { follow, description, search, hideResults, location } = this.state
     const { navigation, reportTypes, searchResult } = this.props;
     const { state: { params } } = navigation;
-    console.log(mapView);
 
     let result = [];
 
@@ -297,7 +346,7 @@ class Publish extends Component {
       <View style={styles.container} >
         <CameraRollHeader
           title="Publish"
-          handleFunction={() => this.handleFunction()}
+          handleFunction={() => this.handlePublish()}
           handleBack={() => this.handleBack()}
         />
         <View style={styles.inputsContainer}>
@@ -381,21 +430,21 @@ class Publish extends Component {
               rotateEnabled={true}
               showUserLocation={false}
               style={{ flex: 1 }}
-              ref={mapView => this.mapView = mapView}
+              ref={view => this.state.mapView = view}
               styleURL={MapboxGL.StyleURL.Light}
               logoEnabled={false}
               onDidFinishLoadingMap={() => this.setState({ mapLoaded: true })}
-              // onPress={cleanSearchAndCenterMap}
+              onPress={(point) => this.cleanSearchAndCenterMap(point)}
               onRegionDidChange={() => this.handleMapPan()}
             >
-              <MapMarker posts={posts} openInfoModal={() => this.openInfoModal()} />
+              {/* <MapMarker posts={posts} openInfoModal={() => this.openInfoModal()} /> */}
               <MapboxGL.UserLocation visible />
               <MapboxGL.Camera
                 zoomLevel={12}
                 followUserLocation={follow}
                 followUserMode={follow ? "course" : "normal"}
                 followHeading={1}
-                ref={mapCamera => this.mapCamera = mapCamera}
+                ref={cam => this.state.mapCamera = cam}
               />
             </MapboxGL.MapView>
           </View>
@@ -418,10 +467,12 @@ const mapStateToProps = state => ({
   loadButton: state.publish.loadButton,
   mute: state.publish.mute,
   loadMedia: state.publish.loadMedia,
-  searchResult: state.search.searchResult
+  searchResult: state.search.searchResult,
+  loading: state.publish.loading,
+  faliure: state.publish.faliure,
 });
 
 const mapDispatchToProps = dispatch =>
-  bindActionCreators({ ...PublishActions, ...searchActions }, dispatch);
+  bindActionCreators({ ...PublishTypes, ...PublishActions, ...searchActions }, dispatch);
 
 export default connect(mapStateToProps, mapDispatchToProps)(Publish);

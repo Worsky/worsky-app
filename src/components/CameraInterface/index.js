@@ -7,11 +7,13 @@ import CameraRollHeader from "../../components/CameraRollHeader";
 
 import styles from "./styles";
 
-export default class CameraInterface extends Component {
+class CameraInterface extends Component {
   state = {
     camera: "back",
     flash: "off",
     recording: false,
+    timer: 0,
+    visible: true
   };
 
   recordVideo = async () => {
@@ -97,9 +99,43 @@ export default class CameraInterface extends Component {
     navigation.navigate('Feed');
   };
 
+  onStart = () => {
+    this.count = setInterval(() => {
+      if (this.state.timer < 10) {
+        this.setState({
+          timer: this.state.timer + 1
+        });
+      }
+    }, 1000)
+  }
+
+  onPause = () => {
+    clearInterval(this.count);
+  }
+
+  toHHMMSS = secs => {
+    // console.log(secs);
+
+    var sec_num = parseInt(secs, 10)
+    var hours = Math.floor(sec_num / 3600)
+    var minutes = Math.floor(sec_num / 60) % 60
+    var seconds = sec_num % 60
+
+    return [hours, minutes, seconds]
+      .map(v => v < 10 ? "0" + v : v)
+      .filter((v, i) => v !== "00" || i > 0)
+      .join(":")
+  }
+
+  componentWillUnmount() {
+    this.state.camera = null;
+    this.onPause();
+    this.setState({ timer: 0 });
+  }
+
 
   render() {
-    const { camera, flash, recording } = this.state;
+    const { camera, flash, recording, timer } = this.state;
     const { only } = this.props;
     const { Type, FlashMode } = RNCamera.Constants;
 
@@ -124,6 +160,7 @@ export default class CameraInterface extends Component {
           nextEnabled={false}
           handleBack={() => this.handleBack()}
         />
+
         <RNCamera
           ref={ref => {
             this.camera = ref;
@@ -137,6 +174,7 @@ export default class CameraInterface extends Component {
             androidRecordAudioPermissionOptions
           }
         />
+
         <View style={styles.controlsContainer}>
           <TouchableOpacity onPress={() => this.changeCamera()}>
             <Icon name="sync" color="white" size={20} />
@@ -160,16 +198,26 @@ export default class CameraInterface extends Component {
           ) : null}
         </View>
         <View style={styles.footer}>
-          <TouchableOpacity
-            onPress={() => this.dispachAction()}
-            onLongPress={() => this.dispachAction()}
-            onPressOut={() => (recording ? this.stopRecording() : false)}
-            style={styles.capture}
-          >
-            <View style={styles.buttonIcon} />
-          </TouchableOpacity>
+          <View>
+            {only == "video" &&
+              <View style={styles.timer}>
+                <Text>{this.toHHMMSS(timer)}</Text>
+              </View>
+            }
+            <TouchableOpacity
+              onPress={() => { this.dispachAction(); this.onStart() }}
+              onLongPress={() => { this.dispachAction(); this.onStart() }}
+              onPressOut={() => { (recording ? this.stopRecording() : false); this.onPause() }}
+              style={styles.capture}
+            // disabled={true}
+            >
+              <View style={styles.buttonIcon} />
+            </TouchableOpacity>
+          </View>
         </View>
       </View>
     );
   }
 }
+
+export default CameraInterface

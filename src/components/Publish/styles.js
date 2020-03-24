@@ -167,7 +167,12 @@ const styles = StyleSheet.create({
   mapView: {
     height: height / 2,
     // width: wi
-  }
+  },
+  uploadIcon: {
+    width: 80,
+    height: 80,
+    resizeMode: "contain"
+  },
 });
 
 export default styles;

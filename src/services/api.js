@@ -38,3 +38,13 @@ export const apiURLToken = token =>
       Accept: "application/json, text/plain, */*"
     }
   });
+
+export const apiURLTokenV2 = token =>
+  axios.create({
+    baseURL: "https://worsky-web-staging.herokuapp.com/api/v2",
+    data: {},
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/json, text/plain, */*"
+    }
+  });
