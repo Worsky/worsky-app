@@ -1,5 +1,13 @@
 import React, { useEffect, useState, useRef } from "react";
-import { StatusBar, Platform, View, Keyboard } from "react-native";
+import {
+  StatusBar,
+  Platform,
+  View,
+  Keyboard,
+  Image,
+  TouchableOpacity
+} from "react-native";
+import Icon from "react-native-vector-icons/FontAwesome";
 import MapboxGL from "@react-native-mapbox-gl/maps";
 import Geolocation from "@react-native-community/geolocation";
 import CompassHeading from "react-native-compass-heading";
@@ -10,8 +18,10 @@ import CustomModal from "~/components/CustomModal";
 import MapTool from "~components/MapTool";
 import MapFilterModalContent from "~/components/MapFilterModalContent";
 import MapMarker from "~/components/MapMarker";
+import MoreInfoModalContent from "~/components/MoreInfoModalContent";
 
 import { plane } from "~/assets";
+import { metrics } from "~/styles";
 
 import {
   dispatchAndVerifyPermissions,
@@ -29,14 +39,15 @@ export default function Maps() {
   const [speed, setSpeed] = useState(0);
   const [altitude, setAltitude] = useState(0);
   const [heading, setHeading] = useState(0);
-  const [follow, setFollow] = useState(true);
-  const [search, setSearch] = useState([]);
+  const [follow, setFollow] = useState(false);
+  const [search, setSearch] = useState("");
   const [searchResult, setSearchResult] = useState([]);
   const [filterModalVisible, setFilterModalVisible] = useState(false);
   const [filters, setFilters] = useState({ all: true });
   const [categories, setCategories] = useState([]);
   const [points, setPoints] = useState([]);
   const [infoPoint, setInfoPoint] = useState({});
+  const [infoModalVisible, setInfoModalVisible] = useState(false);
 
   const refCamera = useRef(null);
   const refMapView = useRef(null);
@@ -47,7 +58,7 @@ export default function Maps() {
 
     if (search.length < 3) return;
 
-    const [longitude, latitude] = await refMapView.getCenter();
+    const [longitude, latitude] = await refMapView.current.getCenter();
 
     const { data: response } = await api.loadSearch(data, latitude, longitude);
 
@@ -74,16 +85,18 @@ export default function Maps() {
 
     setSpeed(coords.speed);
 
-    setCurrentPosition({
-      latitude: coords.latitude,
-      longitute: coords.longitude
-    });
+    if (follow) {
+      setCurrentPosition({
+        latitude: coords.latitude,
+        longitute: coords.longitude
+      });
 
-    refCamera.current.flyTo([coords.longitude, coords.latitude]);
+      refCamera.current.flyTo([coords.longitude, coords.latitude]);
+    }
   };
 
   const onRegionDidChanges = async () => {
-    const [_longitude, _latitude] = await refMapView.getCenter();
+    const [_longitude, _latitude] = await refMapView.current.getCenter();
 
     Geolocation.getCurrentPosition(async ({ coords }) => {
       const { longitude, latitude } = coords;
@@ -139,8 +152,11 @@ export default function Maps() {
 
   const handleMapPan = async () => {
     try {
-      const [[lng1, lat1], [lng2, lat2]] = await mapView.getVisibleBounds();
-      const zoom = await mapView.getZoom();
+      const [
+        [lng1, lat1],
+        [lng2, lat2]
+      ] = await refMapView.current.getVisibleBounds();
+      const zoom = await refMapView.current.getZoom();
 
       let pointIds = Object.keys(filters)
         .filter(k => k !== "all" && filters[k] === true)
@@ -185,13 +201,13 @@ export default function Maps() {
         Number(point.point_type.latitude || point.latitude)
       ];
 
-      // if (refCamera) {
-      await setFollow(false);
+      if (refCamera) {
+        await setFollow(false);
 
-      await refCamera.moveTo(goToCoords, 1200);
-      // } else {
-      //   handleNavigation(point);
-      // }
+        await refCamera.moveTo(goToCoords, 1200);
+      } else {
+        handleNavigation(point);
+      }
     } catch (error) {
       return error;
     }
@@ -200,30 +216,49 @@ export default function Maps() {
   const cleanSearchAndCenterMap = point => {
     setSearch("");
 
-    setResult([]);
+    setSearchResult([]);
 
     Keyboard.dismiss();
 
     mapCenterOnPoint(point);
   };
 
-  useEffect(() => {
-    // Geolocation.watchPosition(
-    //   ({ coords }) => {
-    //     setCurrentPosition({
-    //       latitude: coords.latitude,
-    //       longitute: coords.longitude
-    //     });
-    //   },
-    //   error => Alert.alert(JSON.stringify(error)),
-    //   {
-    //     timeout: 3000,
-    //     maximumAge: 0,
-    //     distanceFilter: 2,
-    //     useSignificantChanges: true
-    //   }
-    // );
+  const handleNavigation = post => {
+    const {
+      point_type: { entity },
+      entity_id: id
+    } = post;
+    const { navigation } = props;
 
+    let destination;
+    let params;
+
+    switch (entity) {
+      case "reports":
+        destination = "PostDetails";
+        params = {
+          reportId: post.report_id,
+          back: "Maps"
+        };
+        break;
+
+      case "airports":
+        destination = "Airport";
+        params = { id };
+        break;
+
+      default:
+        destination = null;
+        params = null;
+        break;
+    }
+
+    return destination && params
+      ? navigation.navigate(destination, params)
+      : false;
+  };
+
+  useEffect(() => {
     CompassHeading.start(3, degree => {
       setHeading(degree);
     });
@@ -331,7 +366,7 @@ export default function Maps() {
           <MoreInfoModalContent
             infoPoint={infoPoint}
             closeModal={setInfoModalVisible}
-            handleNavigation={mapCenterOnPoint}
+            handleNavigation={handleNavigation}
           />
         }
       />
