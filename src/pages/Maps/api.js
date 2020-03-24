@@ -5,6 +5,12 @@ const api = {
   loadCategories: async () =>
     apiURLToken((await getToken()).token).get("/point-type"),
 
+  loadIcons: async () => {
+    const { token } = await getToken();
+
+    return await apiURLToken(token).get("/v2/entity");
+  },
+
   loadPosts: async (
     latitude1,
     longitude1,

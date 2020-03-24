@@ -48,6 +48,7 @@ export default function Maps({ navigation }) {
   const [points, setPoints] = useState([]);
   const [infoPoint, setInfoPoint] = useState({});
   const [infoModalVisible, setInfoModalVisible] = useState(false);
+  const [icons, setIcons] = useState([]);
 
   const refCamera = useRef(null);
   const refMapView = useRef(null);
@@ -86,11 +87,10 @@ export default function Maps({ navigation }) {
     setSpeed(coords.speed);
 
     if (follow) {
-      // setCurrentPosition({
-      //   latitude: coords.latitude,
-      //   longitute: coords.longitude
-      // });
-      refCamera.current.flyTo([coords.longitude, coords.latitude]);
+      setCurrentPosition({
+        latitude: coords.latitude,
+        longitute: coords.longitude
+      });
     }
   };
 
@@ -135,18 +135,26 @@ export default function Maps({ navigation }) {
   };
 
   const handleInitialDatas = async () => {
-    await dispatchAndVerifyPermissions();
+    try {
+      await dispatchAndVerifyPermissions();
 
-    const { data: response } = await api.loadCategories();
+      const { data } = await api.loadIcons();
 
-    setCategories(response.data);
+      setIcons(data.data);
 
-    let newFilters = { all: true };
+      const { data: response } = await api.loadCategories();
 
-    for (category of response.data)
-      newFilters[`point${category.point_type_id}`] = true;
+      setCategories(response.data);
 
-    setFilters(newFilters);
+      let newFilters = { all: true };
+
+      for (category of response.data)
+        newFilters[`point${category.point_type_id}`] = true;
+
+      setFilters(newFilters);
+    } catch (error) {
+      return error;
+    }
   };
 
   const handleMapPan = async () => {
@@ -294,7 +302,11 @@ export default function Maps({ navigation }) {
           heading={heading}
         />
 
-        <MapMarker points={points} openInfoModal={openInfoModal} />
+        <MapMarker
+          points={points}
+          openInfoModal={openInfoModal}
+          icons={icons}
+        />
 
         <MapboxGL.UserLocation onUpdate={handleCenterPosition} />
       </MapboxGL.MapView>
@@ -326,6 +338,7 @@ export default function Maps({ navigation }) {
           value={search}
           style={styles.autocomplete}
           placeholder="Search by location"
+          onFocus={() => setFollow(false)}
           renderItem={({ item }) => (
             <AutocompleteItem
               item={item}
