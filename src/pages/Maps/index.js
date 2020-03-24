@@ -266,6 +266,10 @@ export default function Maps() {
     handleInitialDatas();
   }, []);
 
+  useEffect(() => {
+    handleMapPan();
+  }, [filters]);
+
   return (
     <View style={{ flex: 1 }}>
       <MapboxGL.MapView
