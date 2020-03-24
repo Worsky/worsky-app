@@ -1,10 +1,19 @@
 import React, { useState, useEffect } from "react";
-import { View, Image, TouchableOpacity, Keyboard } from "react-native";
+import {
+  View,
+  Image,
+  TouchableOpacity,
+  Keyboard,
+  Alert,
+  Text,
+  PermissionsAndroid
+} from "react-native";
 import Icon from "react-native-vector-icons/FontAwesome";
 import MapboxGL from "@react-native-mapbox-gl/maps";
 import Geolocation from "@react-native-community/geolocation";
 import Autocomplete from "react-native-autocomplete-input";
 import CompassHeading from "react-native-compass-heading";
+import Haversine from "haversine";
 
 import AutocompleteItem from "~/components/AutocompleteItem";
 import CustomModal from "~/components/CustomModal";
@@ -38,6 +47,13 @@ const Maps3 = props => {
   const [filterModalVisible, setFilterModalVisible] = useState(false);
   const [follow, setFollow] = useState(true);
   const [compassHeading, setCompassHeading] = useState(0);
+  const [speed, setSpeed] = useState(0);
+
+  const [logModal, setLogModal] = useState(false);
+  const [permissions, setPermissions] = useState({
+    coarse: false,
+    fine: false
+  });
 
   const handleSearch = async data => {
     setSearch(data);
@@ -97,7 +113,7 @@ const Maps3 = props => {
 
       if (follow) setFollow(false);
 
-      await mapCamera.flyTo(newCenter);
+      await mapCamera.moveTo(newCenter, 1200);
 
       setFollow(true);
     } catch (error) {
@@ -105,20 +121,67 @@ const Maps3 = props => {
     }
   };
 
-  const handleUserPosition = async () => {
-    Geolocation.watchPosition(
-      position => setUserPosition(position.coords),
-      error => Alert.alert(error.message),
-      { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
+  const dispatchAndVerifyPermissions = async () => {
+    const fine = await PermissionsAndroid.check(
+      PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION
+    );
+    const coarse = await PermissionsAndroid.check(
+      PermissionsAndroid.PERMISSIONS.ACCESS_COARSE_LOCATION
     );
 
-    const { data: response } = await api.loadCategories();
-    setCategories(response.data);
+    !fine &&
+      (await PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+        {
+          title: "Worsky Fine Location Permission",
+          message: "Fine Location",
+          buttonNegative: "Cancel",
+          buttonPositive: "OK"
+        }
+      ));
 
-    if (CompassHeading)
+    !coarse &&
+      (await PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS.ACCESS_COARSE_LOCATION,
+        {
+          title: "Worsky Coarse Location Permission",
+          message: "Coarse Location",
+          buttonNegative: "Cancel",
+          buttonPositive: "OK"
+        }
+      ));
+
+    await setPermissions({ ...permissions, fine, coarse });
+  };
+
+  const handleUserPosition = async () => {
+    try {
+      Geolocation.watchPosition(
+        ({ coords }) => {
+          setUserPosition(coords);
+        },
+        error => {
+          Alert.alert(error.message);
+        },
+        {
+          enableHighAccuracy: true,
+          timeout: 5000,
+          maximumAge: 0,
+          distanceFilter: 3
+        }
+      );
+
       CompassHeading.start(3, degree => {
         setCompassHeading(degree);
       });
+
+      await dispatchAndVerifyPermissions();
+
+      const { data: response } = await api.loadCategories();
+      setCategories(response.data);
+    } catch (error) {
+      return error;
+    }
   };
 
   useEffect(() => {
@@ -127,6 +190,8 @@ const Maps3 = props => {
 
   useEffect(() => {
     handleMapPan();
+
+    if (follow) centerMapOnMe();
   }, [userPosition, filters]);
 
   useEffect(() => {
@@ -195,7 +260,7 @@ const Maps3 = props => {
       if (mapCamera) {
         await setFollow(false);
 
-        await mapCamera.flyTo(goToCoords);
+        await mapCamera.moveTo(goToCoords, 1200);
       } else {
         handleNavigation(point);
       }
@@ -229,53 +294,138 @@ const Maps3 = props => {
     setSearch("");
   };
 
+  const onRegionDidChanges = async () => {
+    const [_longitude, _latitude] = await mapView.getCenter();
+
+    Geolocation.getCurrentPosition(async ({ coords }) => {
+      const { longitude, latitude } = coords;
+
+      const shouldFollowUpdate = errorMarginToDisplayTargetIcon(
+        { _longitude, _latitude },
+        { longitude, latitude }
+      );
+
+      if (!shouldFollowUpdate) await setFollow(shouldFollowUpdate);
+    });
+
+    if (!follow) handleMapPan();
+  };
+
+  const errorMarginToDisplayTargetIcon = (screenCoord, userCoord) => {
+    const { _longitude, _latitude } = screenCoord;
+
+    const _longitudeFormated = Number(_longitude.toFixed(4));
+    const _latitudeFormated = Number(_latitude.toFixed(4));
+
+    const { longitude, latitude } = userCoord;
+
+    const longitudeFormated = Number(longitude.toFixed(4));
+    const latitudeFormated = Number(latitude.toFixed(4));
+
+    const result = { followLatitude: true, followLongitude: true };
+
+    if (_latitudeFormated != latitudeFormated) {
+      let addNumber = 0.0005;
+
+      if (Math.sign(_latitudeFormated) == -1) addNumber = -0.0005;
+
+      const difference = (_latitudeFormated - latitudeFormated).toFixed(4);
+
+      if (difference <= addNumber) result.followLatitude = false;
+    }
+
+    if (_longitudeFormated != longitudeFormated) {
+      let addNumber = 0.0005;
+
+      if (Math.sign(_longitudeFormated) == -1) addNumber = -0.0005;
+
+      const difference = (_longitudeFormated - longitudeFormated).toFixed(4);
+
+      if (difference <= addNumber) result.followLongitude = false;
+    }
+
+    if (!result.followLatitude || !result.followLongitude) return false;
+
+    return true;
+  };
+
   return (
     <View style={styles.container}>
       <MapboxGL.MapView
-        rotateEnabled={true}
-        showUserLocation={false}
         style={{ flex: 1 }}
-        ref={setMapView}
         styleURL={MapboxGL.StyleURL.Light}
         logoEnabled={false}
+        compassEnabled={false}
+        attributionEnabled={false}
+        ref={setMapView}
         onDidFinishLoadingMap={() => {
           setMapLoaded(true);
         }}
         onPress={cleanSearchAndCenterMap}
-        onRegionDidChange={handleMapPan}
+        onRegionDidChange={onRegionDidChanges}
       >
-        <MapMarker posts={posts} openInfoModal={openInfoModal} />
-        <MapboxGL.UserLocation visible />
         <MapboxGL.Camera
           zoomLevel={12}
           followUserLocation={follow}
-          followUserMode={follow ? "course" : "normal"}
-          followHeading={1}
+          followUserMode={
+            follow
+              ? MapboxGL.UserTrackingModes.FollowWithHeading
+              : MapboxGL.UserTrackingModes.Follow
+          }
+          followHeading={0}
           ref={setMapCamera}
+          centerCoordinate={[userPosition.longitude, userPosition.latitude]}
+          zoomLevel={14}
         />
+        <MapMarker posts={posts} openInfoModal={openInfoModal} />
+        <MapboxGL.UserLocation />
       </MapboxGL.MapView>
 
       <Image source={plane} style={styles.planeOnMap} height={64} width={64} />
 
-      <TouchableOpacity style={styles.myPositionButton} onPress={centerMapOnMe}>
-        <Icon name="crosshairs" size={22} color={"black"} />
-      </TouchableOpacity>
+      {!follow && (
+        <TouchableOpacity
+          style={styles.myPositionButton}
+          onPress={centerMapOnMe}
+        >
+          <Icon name="crosshairs" size={22} color={"black"} />
+        </TouchableOpacity>
+      )}
 
       <View style={styles.instruments}>
+        <MapNumberMarkers text={`${speed.toFixed(1)} kt`} />
+
         <MapNumberMarkers
-          text={`${Math.round(
-            (userPosition.speed < 0 ? 0 : userPosition.speed) * 1.94384
-          )}${" "}
-              kt`}
+          text={`${Math.round(compassHeading || 0)}º`}
+          onPress={() => setLogModal(true)}
         />
 
-        <MapNumberMarkers text={`${Math.round(compassHeading || 0)}º`} />
-
         <MapNumberMarkers
-          text={`${Math.round(userPosition.altitude * 3.28084)} ft`}
+          text={`${Math.round(userPosition.altitude * 3.2808)} ft`}
+        />
+
+        <CustomModal
+          close={true}
+          visible={logModal}
+          changeVisibility={() => setLogModal(false)}
+          content={
+            <View>
+              <Text>Fine Location: {permissions.fine ? "true" : "false"}</Text>
+              <Text>
+                Coarse Location: {permissions.coarse ? "true" : "false"}
+              </Text>
+              <Text>Follow mode: {follow ? "course" : "normal"}</Text>
+              <Text>Speed | Haversine: {speed}</Text>
+              <Text>Compass | CompassHeading: {compassHeading}</Text>
+              <Text>Speed | Geolocation: {userPosition.speed}</Text>
+              <Text>Heading | Geolocation: {userPosition.heading}</Text>
+              <Text>Altitude | Geolocation: {userPosition.altitude}</Text>
+              <Text>Longitude | Geolocation: {userPosition.longitude}</Text>
+              <Text>Latitude | Geolocation: {userPosition.latitude}</Text>
+            </View>
+          }
         />
       </View>
-
       <View style={styles.searchContainer}>
         <Autocomplete
           data={result}
@@ -323,7 +473,6 @@ const Maps3 = props => {
           close={true}
         />
       </View>
-
       {infoPoint && (
         <CustomModal
           close={false}

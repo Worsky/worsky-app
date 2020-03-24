@@ -8,7 +8,6 @@ import ReportList from "~/components/ReportList";
 import styles from "./styles";
 
 const Reports = ({ data, navigation }) => (
-  //   console.tron.log(navigation);
   <View style={styles.container}>
     <View style={styles.headerContainer}>
       <Icon name="th-large" style={styles.headerIcon} />

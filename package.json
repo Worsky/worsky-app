@@ -1,10 +1,11 @@
 {
   "name": "Worsky",
-  "version": "1.9.0",
+  "version": "1.28.8",
   "private": true,
   "scripts": {
+    "android": "adb reverse tcp:9090 tcp:9090 && react-native run-android",
+    "androidClean": "adb reverse tcp:9090 tcp:9090 && rm -rf android/app/build/generated/res/google-services/debug && react-native run-android",
     "start": "node node_modules/react-native/local-cli/cli.js start",
-    "android": "react-native run-android",
     "postinstall": "jetify",
     "test": "jest",
     "react-devtool": "react-devtools"
@@ -22,6 +23,7 @@
     "currency-formatter": "^1.5.4",
     "events": "^3.0.0",
     "global": "^4.4.0",
+    "haversine": "^1.1.1",
     "html-entities": "^1.2.1",
     "jetifier": "^1.6.2",
     "lodash": "^4.17.11",
@@ -50,7 +52,6 @@
     "react-native-reanimated": "^1.1.0",
     "react-native-safe-area-context": "^0.7.3",
     "react-native-screens": "^2.0.0-beta.2",
-    "react-native-sensors": "^5.3.3",
     "react-native-sideswipe": "^1.5.0",
     "react-native-snap-carousel": "^3.8.2",
     "react-native-star-rating": "^1.1.0",
