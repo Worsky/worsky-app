@@ -3,8 +3,12 @@ import { StatusBar, Platform, View, Alert } from "react-native";
 import MapboxGL from "@react-native-mapbox-gl/maps";
 import Geolocation from "@react-native-community/geolocation";
 import CompassHeading from "react-native-compass-heading";
+import Autocomplete from "react-native-autocomplete-input";
 
+import AutocompleteItem from "~/components/AutocompleteItem";
+import CustomModal from "~/components/CustomModal";
 import MapTool from "~components/MapTool";
+import MapFilterModalContent from "~/components/MapFilterModalContent";
 
 import { plane } from "~/assets";
 
@@ -24,8 +28,27 @@ export default function Maps() {
   const [altitude, setAltitude] = useState(0);
   const [heading, setHeading] = useState(0);
   const [follow, setFollow] = useState(true);
+  const [search, setSearch] = useState([]);
+  const [searchResult, setSearchResult] = useState([]);
+  const [filterModalVisible, setFilterModalVisible] = useState(false);
+  const [filters, setFilters] = useState({ all: true });
+  const [categories, setCategories] = useState([]);
+
   const refCamera = useRef(null);
   const refMapView = useRef(null);
+
+  const handleSearch = async data => {
+    setSearch(data);
+    setSearchResult([]);
+
+    if (search.length < 3) return;
+
+    const [longitude, latitude] = await refMapView.getCenter();
+
+    const { data:response } = await api.loadSearch(data, latitude, longitude);
+
+    setSearchResult(response.data);
+  };
 
   const centerMapOnMe = async () => {
     try {
@@ -96,6 +119,15 @@ export default function Maps() {
     CompassHeading.start(3, degree => {
       setHeading(degree);
     });
+
+    const { data: response } = await api.loadCategories();
+
+    let newFilters = { all: true };
+
+    for (category of response.data)
+      newFilters[`point${category.point_type_id}`] = true;
+
+    setFilters(newFilters);
   }, []);
 
   return (
@@ -138,6 +170,69 @@ export default function Maps() {
 
         <MapTool text={`${Math.round(altitude * 3.2808)} ft`} />
       </View>
+
+      <View style={styles.searchContainer}>
+        <Autocomplete
+          data={searchResult}
+          onChangeText={text => handleSearch(text)}
+          clearButtonMode="while-editing"
+          value={search}
+          style={styles.autocomplete}
+          placeholder="Search by location"
+          renderItem={({ item }) => (
+            <AutocompleteItem
+              item={item}
+              handleClick={cleanSearchAndCenterMap}
+              cleanField={cleanField}
+            />
+          )}
+          listStyle={{
+            maxHeight: metrics.height / 1.6,
+            borderColor: "white",
+            width: metrics.width / 1.1
+          }}
+          keyExtractor={(item, i) => String(i)}
+          inputContainerStyle={{ borderColor: "white" }}
+          keyboardShouldPersistTaps="always"
+        />
+        {searchResult.length == 0 && (
+          <TouchableOpacity
+            style={styles.filterIconContainer}
+            onPress={() => setFilterModalVisible(true)}
+          >
+            <Icon name="filter" style={styles.filterIcon} size={24} />
+          </TouchableOpacity>
+        )}
+
+        <CustomModal
+          visible={filterModalVisible}
+          changeVisibility={() => setFilterModalVisible(false)}
+          maxHeight={540}
+          content={
+            <MapFilterModalContent
+              filters={filters}
+              categories={categories}
+              toggleFilter={toggleFilter}
+            />
+          }
+          close={true}
+        />
+      </View>
+      {infoPoint && (
+        <CustomModal
+          close={false}
+          visible={infoModalVisible}
+          changeVisibility={() => setInfoModalVisible(false)}
+          content={
+            <MoreInfoModalContent
+              infoPoint={infoPoint}
+              closeModal={setInfoModalVisible}
+              handleNavigation={handleNavigation}
+            />
+          }
+        />
+      )}
+    </View>
     </View>
   );
 }
