@@ -9,7 +9,7 @@ import loadNotifications from "./notifications";
 import { loadProfile, editProfile } from "./profile";
 import {
   loadReportType,
-  publshNow,
+  publishNow,
   uploadAndroidImage,
   uploadAndroidVideo,
   uploadIosImage,
@@ -60,7 +60,7 @@ export default function* rootSaga() {
     takeLatest(PublishTypes.UPLOAD_ANDROID_VIDEO, uploadAndroidVideo),
     takeLatest(PublishTypes.UPLOAD_IOS_IMAGE, uploadIosImage),
     takeLatest(PublishTypes.UPLOAD_IOS_VIDEO, uploadIosVideo),
-    takeLatest(PublishTypes.PUBLISH, publshNow),
+    takeLatest(PublishTypes.PUBLISH, publishNow),
 
     takeLatest(MapsTypes.LOAD_POST, loadPosts),
     takeLatest(MapsTypes.ON_REGION_CHANGE_COMPLETE, onRegionChangeComplete),

@@ -102,47 +102,43 @@ class Publish extends Component {
     }
   };
 
+  handleCorfirm = () => {
+    Alert.alert(
+      'Publish',
+      'You will publish this now, are you sure?',
+      [
+        {
+          text: 'Cancel',
+          onPress: () => { },
+          style: 'cancel',
+        },
+        { text: 'OK', onPress: () => this.handlePublish() },
+      ],
+      { cancelable: false },
+    );
+  }
+
   handlePublish = async () => {
-    const { publishNow } = this.props;
+    const { publishNow, uri } = this.props;
 
     const {
       description,
       entity_id,
       userId,
       location,
-      preview,
-      image
     } = this.state;
-    console.log(image);
 
-    const media = await this.handleMediaUrl(image);
-
-
-    const response = await publishNow(
+    await publishNow(
       location.latitude,
       location.longitude,
       description,
-      media,
+      uri,
       entity_id,
       userId
     );
 
     this.cleanState()
   };
-
-  handleMediaUrl = async media => {
-    console.log(media);
-
-    const { mediaType } = this.state
-    const { uploadAndroidImage, uploadAndroidVideo } = this.props;
-    // const { uri } = preview;
-
-    if (mediaType === "video") {
-      return await uploadAndroidVideo(media)
-    }
-
-    return await uploadAndroidImage(media);
-  }
 
   renderAutocomplete = ({ item }) => {
     const { navigation } = this.props;
@@ -346,7 +342,7 @@ class Publish extends Component {
       <View style={styles.container} >
         <CameraRollHeader
           title="Publish"
-          handleFunction={() => this.handlePublish()}
+          handleFunction={() => this.handleCorfirm()}
           handleBack={() => this.handleBack()}
         />
         <View style={styles.inputsContainer}>

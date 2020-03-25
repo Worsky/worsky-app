@@ -47,7 +47,7 @@ export function* uploadAndroidImage(action) {
 
     return yield put(PublishActions.sendDone(response.data.data.path));
   } catch (error) {
-    // console.log({ error });
+    console.log({ error });
 
     return yield put(PublishActions.sendDone(false));
   }
@@ -61,20 +61,24 @@ export function* uploadAndroidVideo(action) {
     const data = new FormData();
 
     const file = {
-      name: media.path.split("/").slice(-1)[0],
+      name: media.uri.split("/").slice(-1)[0],
       type: "video/mp4",
-      uri: media.uri.replace("file://", "")
+      uri: media.uri,
+      // uri: media.uri.replace("file://", "")
     };
 
     data.append("media", file);
 
     const response = yield call(apiURLTokenV2(token).post, "/report/media", data);
 
+    console.log(response);
+
     if (!response.data.success)
       return yield put(PublishActions.sendDone(response.data.success));
 
     return yield put(PublishActions.sendDone(response.data.data.path));
   } catch (error) {
+    console.log({ error });
     return yield put(PublishActions.sendDone(false));
   }
 }
@@ -152,7 +156,7 @@ export function* uploadIosVideo(action) {
   }
 }
 
-export function* publshNow(action) {
+export function* publishNow(action) {
   try {
     const {
       latitude,
@@ -173,6 +177,9 @@ export function* publshNow(action) {
     if (mediaUrl) data.append("media_url", mediaUrl);
 
     const response = yield call(apiURLTokenV2(token).post, "/report", data);
+
+    console.log(response);
+
 
     if (!response.data.success)
       return yield put(PublishActions.publishFaliure());

@@ -22,6 +22,9 @@ export default class Gallery extends Component {
       paused
     } = this.state;
 
+    console.log({ width, height });
+
+
     if (type == "video/mp4")
       return (
         <TouchableWithoutFeedback
@@ -39,8 +42,8 @@ export default class Gallery extends Component {
 
     return (
       <ViewZoom
-        width={Dimensions.get("window").width}
-        height={Dimensions.get("window").height}
+        width={width}
+        height={height}
         uri={uri}
         ref={viewZoom => (this.viewZoom = viewZoom)}
       />
@@ -59,6 +62,8 @@ export default class Gallery extends Component {
       offset,
       size: { width: current.width, height: current.height }
     };
+
+
     return await ImageEditor.cropImage(current.uri, cropData);
   };
 
@@ -72,7 +77,7 @@ export default class Gallery extends Component {
 
     response = { ...current, uri: current.type === "video/mp4" ? current.uri : response };
 
-    navigation.navigate('Publish', { response, mediaType });
+    navigation.navigate('PublishPreview', { response, mediaType });
   }
 
   handleBack = () => {
