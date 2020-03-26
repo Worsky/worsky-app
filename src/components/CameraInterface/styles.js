@@ -34,7 +34,7 @@ const styles = StyleSheet.create({
   },
   timer: {
     alignItems: 'center',
-    marginBottom: 20
+    marginBottom: 20,
   },
   buttonIcon: {
     backgroundColor: "white",

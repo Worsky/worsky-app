@@ -173,6 +173,12 @@ const styles = StyleSheet.create({
     height: 80,
     resizeMode: "contain"
   },
+  planeOnMap: {
+    position: "absolute",
+    top: "50%",
+    left: "50%",
+    transform: [{ translateX: -32 }, { translateY: -32 }]
+  }
 });
 
 export default styles;

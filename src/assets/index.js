@@ -7,6 +7,7 @@ import userImageFirst from "./images/feedImages/prettyYoungGirlTravelerWithABack
 import userImageSecond from "./images/feedImages/outdoorShotOfYoungManInSmallPlaneCockpitW68Xc2R.png";
 import airplane from "./images/icons/categories/airplane.png";
 import plane from "./images/icons/plane.png";
+import pinmap from "./images/icons/pinmap.png";
 
 import likeActive from "./images/icons/like/likeActive.png";
 import like from "./images/icons/like/like.png";
@@ -70,5 +71,6 @@ export {
   slider4,
   slider5,
   slider6,
-  plane
+  plane,
+  pinmap
 };

@@ -3,6 +3,7 @@ import { View, TouchableWithoutFeedback, ScrollView, Dimensions } from "react-na
 import Video from "react-native-video";
 import Icon from "react-native-vector-icons/FontAwesome";
 import ImageEditor from "@react-native-community/image-editor";
+// import ImagePicker from 'react-native-image-crop-picker';
 
 import ViewZoom from "../../components/ViewZoom";
 import CameraRollList from "../../components/CameraRollList";
@@ -21,9 +22,6 @@ export default class Gallery extends Component {
       current: { width, height, uri, type },
       paused
     } = this.state;
-
-    console.log({ width, height });
-
 
     if (type == "video/mp4")
       return (
@@ -56,28 +54,49 @@ export default class Gallery extends Component {
   };
 
   handleCrop = async () => {
-    const { current } = this.state;
-    const offset = this.viewZoom.getOffset();
-    const cropData = {
-      offset,
-      size: { width: current.width, height: current.height }
-    };
+    try {
+      const { current } = this.state;
+
+      const offset = this.viewZoom.getOffset();
+
+      const cropData = {
+        offset,
+        size: { width: current.width, height: current.height }
+      };
+
+      console.log({ cropData })
+
+      const response = await ImageEditor.cropImage(current.uri, cropData);
+      // const response = await ImagePicker.openPicker({
+      //   width: 300,
+      //   height: 400,
+      //   cropping: true
+      // })
 
 
-    return await ImageEditor.cropImage(current.uri, cropData);
+      return response;
+    } catch (error) {
+      console.log(error)
+    }
   };
 
   handleFunction = async () => {
-    const { current } = this.state;
-    const { navigation } = this.props;
+    try {
+      const { current } = this.state;
+      const { navigation } = this.props;
 
-    const mediaType = current.type === "video/mp4" ? "video" : "photo";
+      const mediaType = current.type === "video/mp4" ? "video" : "photo";
 
-    let response = current.type === "video/mp4" ? current : await this.handleCrop();
+      let response = current.type === "video/mp4" ? current : await this.handleCrop();
 
-    response = { ...current, uri: current.type === "video/mp4" ? current.uri : response };
+      response = { ...current, uri: current.type === "video/mp4" ? current.uri : response };
 
-    navigation.navigate('PublishPreview', { response, mediaType });
+      console.log(response);
+
+      navigation.navigate('PublishPreview', { response, mediaType });
+    } catch (error) {
+      console.log(error)
+    }
   }
 
   handleBack = () => {

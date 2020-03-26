@@ -1,4 +1,4 @@
-import { Platform } from "react-native";
+import { Platform, Alert } from "react-native";
 import { put, call } from "redux-saga/effects";
 
 import { navigate } from "~/services/navigation";
@@ -40,14 +40,12 @@ export function* uploadAndroidImage(action) {
 
     const response = yield call(apiURLTokenV2(token).post, "/report/media", data);
 
-    console.log(response);
-
     if (!response.data.success)
       return yield put(PublishActions.sendDone(response.data.success));
 
     return yield put(PublishActions.sendDone(response.data.data.path));
   } catch (error) {
-    console.log({ error });
+    // console.log({ error });
 
     return yield put(PublishActions.sendDone(false));
   }
@@ -71,14 +69,12 @@ export function* uploadAndroidVideo(action) {
 
     const response = yield call(apiURLTokenV2(token).post, "/report/media", data);
 
-    console.log(response);
-
     if (!response.data.success)
       return yield put(PublishActions.sendDone(response.data.success));
 
     return yield put(PublishActions.sendDone(response.data.data.path));
   } catch (error) {
-    console.log({ error });
+    // console.log({ error });
     return yield put(PublishActions.sendDone(false));
   }
 }
@@ -178,9 +174,6 @@ export function* publishNow(action) {
 
     const response = yield call(apiURLTokenV2(token).post, "/report", data);
 
-    console.log(response);
-
-
     if (!response.data.success)
       return yield put(PublishActions.publishFaliure());
 
@@ -190,7 +183,15 @@ export function* publishNow(action) {
       toastMessage: "Your report has been sended successfuly!"
     });
   } catch (error) {
-    console.log({ error });
+    // console.log({ error });
+    Alert.alert(
+      'Error',
+      'There was an error, please try again!',
+      [
+        { text: 'OK', onPress: () => { } },
+      ],
+      { cancelable: false },
+    );
 
     return yield put(PublishActions.publishFaliure());
   }

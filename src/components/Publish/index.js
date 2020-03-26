@@ -24,6 +24,7 @@ import { Creators as searchActions } from "~/store/ducks/search";
 
 import CameraRollHeader from "~/components/CameraRollHeader";
 import AutocompleteItem from "~/components/AutocompleteItem";
+import LoadingPage from "../LoadingPage";
 import MapMarker from "~/components/MapMarker";
 
 import Icon from 'react-native-vector-icons/MaterialIcons';
@@ -32,7 +33,10 @@ import IconAw from "react-native-vector-icons/FontAwesome5";
 import styles from "./styles";
 
 import { colors, metrics } from "~/styles";
-import api from "../../pages/Maps/Map3/api";
+import { pinmap } from "~/assets";
+
+import api from "../../pages/Maps/api";
+import { dispatchAndVerifyPermissions } from "../../pages/Maps/helpers";
 
 MapboxGL.setAccessToken(
   "sk.eyJ1Ijoiam9lbGJhbnphdHRvIiwiYSI6ImNrNDk2cmkzNzAwdHkzZHMyY2x2ZGh0eXYifQ.EeAfcaGLuGKv0FV90GT27g"
@@ -119,7 +123,7 @@ class Publish extends Component {
   }
 
   handlePublish = async () => {
-    const { publishNow, uri } = this.props;
+    const { publishNow, uri, faliure } = this.props;
 
     const {
       description,
@@ -137,7 +141,9 @@ class Publish extends Component {
       userId
     );
 
-    this.cleanState()
+    // if (faliure)
+    //   this.cleanState()
+
   };
 
   renderAutocomplete = ({ item }) => {
@@ -222,22 +228,28 @@ class Publish extends Component {
   };
 
   handleUserPosition = async () => {
-    Geolocation.watchPosition(
-      position => this.setState({
-        userPosition: position.coords,
-        location: { latitude: position.coords.latitude, longitude: position.coords.longitude }
-      }),
-      error => Alert.alert(error.message),
-      { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
-    );
+    try {
+      Geolocation.watchPosition(
+        position => this.setState({
+          userPosition: position.coords,
+          location: { latitude: position.coords.latitude, longitude: position.coords.longitude }
+        }),
+        error => Alert.alert(error.message),
+        {
+          enableHighAccuracy: true, timeout: 5000, maximumAge: 0, distanceFilter: 3
+        }
+      );
 
-    const { data: response } = await api.loadCategories();
-    this.setState({ categories: response.data });
+      const { data: response } = await api.loadCategories();
+      this.setState({ categories: response.data });
 
-    if (CompassHeading)
-      CompassHeading.start(3, degree => {
-        this.setState({ compassHeading: degree })
-      });
+      if (CompassHeading)
+        CompassHeading.start(3, degree => {
+          this.setState({ compassHeading: degree })
+        });
+    } catch (error) {
+      return error;
+    }
   };
 
   openInfoModal = point => {
@@ -250,15 +262,14 @@ class Publish extends Component {
   };
 
   cleanSearchAndCenterMap = point => {
-    const { point_type } = point;
-    const location = {
-      latitude: point_type.latitude,
-      longitude: point_type.longitude
-    }
+    // const { point_type } = point;
+    // const location = {
+    //   latitude: point_type.latitude,
+    //   longitude: point_type.longitude
+    // }
 
     this.setState({
       search: "",
-      location
     });
 
     // setSearch("");
@@ -303,6 +314,14 @@ class Publish extends Component {
     })
   };
 
+  handleCenterPosition = ({ coords }) => {
+    if (this.state.follow) {
+      this.setState({
+        location: { latitude: coords.latitude, longitude: coords.longitude }
+      })
+    }
+  };
+
   async componentWillMount() {
     const { navigation } = this.props;
     const { state: { params } } = navigation;
@@ -316,6 +335,8 @@ class Publish extends Component {
     }
 
     const { loadReportTypes } = this.props;
+
+    await dispatchAndVerifyPermissions();
 
     await loadReportTypes();
   }
@@ -342,6 +363,7 @@ class Publish extends Component {
       <View style={styles.container} >
         <CameraRollHeader
           title="Publish"
+          next="Finish"
           handleFunction={() => this.handleCorfirm()}
           handleBack={() => this.handleBack()}
         />
@@ -393,7 +415,7 @@ class Publish extends Component {
                 this.setState({ scrollEnabled: false });
               }}
               style={styles.searchInput}
-              placeholder="Ex.: broken aircraft, airports, NY heliport..."
+              placeholder="Ex.: Location..."
               value={search}
               renderItem={this.renderAutocomplete}
               listStyle={{
@@ -432,19 +454,53 @@ class Publish extends Component {
               onDidFinishLoadingMap={() => this.setState({ mapLoaded: true })}
               onPress={(point) => this.cleanSearchAndCenterMap(point)}
               onRegionDidChange={() => this.handleMapPan()}
+              centerCoordinate={[
+                location.longitude,
+                location.latitude
+              ]}
             >
-              {/* <MapMarker posts={posts} openInfoModal={() => this.openInfoModal()} /> */}
-              <MapboxGL.UserLocation visible />
               <MapboxGL.Camera
-                zoomLevel={12}
+                zoomLevel={15}
                 followUserLocation={follow}
                 followUserMode={follow ? "course" : "normal"}
                 followHeading={1}
                 ref={cam => this.state.mapCamera = cam}
               />
-            </MapboxGL.MapView>
-          </View>
 
+              <MapboxGL.UserLocation onUpdate={(coords) => this.handleCenterPosition(coords)} />
+            </MapboxGL.MapView>
+
+            {/* <MapboxGL.MapView
+              style={{ flex: 1 }}
+              styleURL={MapboxGL.StyleURL.Light}
+              logoEnabled={false}
+              attributionEnabled={false}
+              // ref={refMapView}
+              ref={view => this.state.mapView = view}
+              // onPress={cleanSearchAndCenterMap}
+              onPress={(point) => this.cleanSearchAndCenterMap(point)}
+              // onRegionDidChange={onRegionDidChanges}
+              onRegionDidChange={() => this.handleMapPan()}
+            >
+              <MapboxGL.Camera
+                followUserLocation={follow}
+                // followUserMode={MapboxGL.UserTrackingModes.FollowWithHeading}
+                followUserMode={follow ? "course" : "normal"}
+                centerCoordinate={[
+                  location.longitude,
+                  location.latitude
+                ]}
+                zoomLevel={15}
+                // ref={refCamera}
+                ref={cam => this.state.mapCamera = cam}
+              // heading={heading}
+              />
+
+              <MapboxGL.UserLocation onUpdate={(coords) => this.handleCenterPosition(coords)} />
+            </MapboxGL.MapView> */}
+
+            <Image source={pinmap} style={styles.planeOnMap} height={64} width={64} />
+          </View>
         </View>
       </View >
     );

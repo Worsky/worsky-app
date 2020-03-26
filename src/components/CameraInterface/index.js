@@ -1,9 +1,10 @@
 import React, { Component } from "react";
-import { View, TouchableOpacity, Text } from "react-native";
+import { View, TouchableOpacity, Text, ActivityIndicator } from "react-native";
 import { RNCamera } from "react-native-camera";
 import Icon from "react-native-vector-icons/FontAwesome5";
 
 import CameraRollHeader from "../../components/CameraRollHeader";
+import LoadingPage from "../../components/LoadingPage";
 
 import styles from "./styles";
 
@@ -13,7 +14,8 @@ class CameraInterface extends Component {
     flash: "off",
     recording: false,
     timer: 0,
-    visible: true
+    visible: true,
+    loading: false
   };
 
   recordVideo = async () => {
@@ -26,8 +28,6 @@ class CameraInterface extends Component {
         pauseAfterCapture: true,
       };
 
-      this.setState({ recording: false });
-
       return await this.camera.recordAsync(options);
     } catch (error) {
       this.setState({ recording: false });
@@ -37,6 +37,8 @@ class CameraInterface extends Component {
   };
 
   stopRecording = () => {
+    this.setState({ recording: false });
+    this.handleLoading();
     this.camera.stopRecording();
   };
 
@@ -66,9 +68,9 @@ class CameraInterface extends Component {
     }
 
     if (only == "photo") {
-      const response = await this.takePhoto(camera);
+      this.handleLoading();
 
-      // await CameraRoll.saveToCameraRoll(response.uri)
+      const response = await this.takePhoto(camera);
 
       navigation.navigate('PublishPreview', { response, mediaType: "photo" });
     }
@@ -99,6 +101,8 @@ class CameraInterface extends Component {
     navigation.navigate('Feed');
   };
 
+  handleLoading = () => this.setState({ loading: !this.state.loading })
+
   onStart = () => {
     this.count = setInterval(() => {
       if (this.state.timer < 10) {
@@ -114,8 +118,6 @@ class CameraInterface extends Component {
   }
 
   toHHMMSS = secs => {
-    // console.log(secs);
-
     var sec_num = parseInt(secs, 10)
     var hours = Math.floor(sec_num / 3600)
     var minutes = Math.floor(sec_num / 60) % 60
@@ -131,11 +133,12 @@ class CameraInterface extends Component {
     this.state.camera = null;
     this.onPause();
     this.setState({ timer: 0 });
+    this.handleLoading();
   }
 
 
   render() {
-    const { camera, flash, recording, timer } = this.state;
+    const { camera, flash, recording, timer, loading } = this.state;
     const { only } = this.props;
     const { Type, FlashMode } = RNCamera.Constants;
 
@@ -199,20 +202,25 @@ class CameraInterface extends Component {
         </View>
         <View style={styles.footer}>
           <View>
-            {only == "video" &&
-              <View style={styles.timer}>
-                <Text>{this.toHHMMSS(timer)}</Text>
-              </View>
+            {loading ?
+              <LoadingPage /> :
+              <>
+                {only == "video" &&
+                  <View style={styles.timer}>
+                    <Text>{this.toHHMMSS(timer)}</Text>
+                  </View>
+                }
+                <TouchableOpacity
+                  onPress={() => { this.dispachAction(); this.onStart() }}
+                  onLongPress={() => { this.dispachAction(); this.onStart() }}
+                  onPressOut={() => { (recording ? this.stopRecording() : false); this.onPause(); }}
+                  style={styles.capture}
+                // disabled={true}
+                >
+                  <View style={styles.buttonIcon} />
+                </TouchableOpacity>
+              </>
             }
-            <TouchableOpacity
-              onPress={() => { this.dispachAction(); this.onStart() }}
-              onLongPress={() => { this.dispachAction(); this.onStart() }}
-              onPressOut={() => { (recording ? this.stopRecording() : false); this.onPause() }}
-              style={styles.capture}
-            // disabled={true}
-            >
-              <View style={styles.buttonIcon} />
-            </TouchableOpacity>
           </View>
         </View>
       </View>
@@ -220,4 +228,4 @@ class CameraInterface extends Component {
   }
 }
 
-export default CameraInterface
+export default CameraInterface;

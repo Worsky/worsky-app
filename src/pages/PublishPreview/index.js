@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { View, Image, Text, TouchableWithoutFeedback, ActivityIndicator } from 'react-native';
+import { View, Image, Text, TouchableWithoutFeedback } from 'react-native';
 import Video from "react-native-video";
 import Icon from "react-native-vector-icons/FontAwesome";
+
+import LoadingPage from "../../components/LoadingPage";
 
 import { Creators as PublishActions } from "~/store/ducks/publish";
 
@@ -17,7 +19,7 @@ export default function PublishPreview({ navigation }) {
   const faliure = useSelector(state => state.publish.faliure);
 
   const { state: { params } } = navigation;
-  const [paused, setPaused] = useState(false);
+  const [paused, setPaused] = useState(true);
   const [visible, setVisible] = useState(true);
 
   handleFunction = async navigation => {
@@ -58,7 +60,7 @@ export default function PublishPreview({ navigation }) {
               source={{ uri: params.response.uri }}
               resizeMode="cover"
               repeat={true}
-              paused={paused}
+              paused={!paused}
               style={styles.video}
             />
           </TouchableWithoutFeedback>
@@ -66,7 +68,7 @@ export default function PublishPreview({ navigation }) {
         :
         <Image source={{ uri: params.response.uri }} style={[styles.preview, styles.uploadIcon]} />
       }
-      {loadMedia && <ActivityIndicator color={colors.worSky.white} style={styles.loadMedia} />}
+      {loadMedia && <LoadingPage color={colors.worSky.white} style={styles.loadMedia} />}
     </View>
   );
 }
