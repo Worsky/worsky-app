@@ -3,6 +3,7 @@ package com.pilotobrasil;
 import android.app.Application;
 
 import com.facebook.react.ReactApplication;
+import com.corbt.keepawake.KCKeepAwakePackage;
 import org.reactnative.camera.RNCameraPackage;
 import com.th3rdwave.safeareacontext.SafeAreaContextPackage;
 import org.reactnative.maskedview.RNCMaskedViewPackage;
@@ -43,7 +44,8 @@ public class MainApplication extends Application implements ReactApplication {
 
     @Override
     protected List<ReactPackage> getPackages() {
-      return Arrays.<ReactPackage>asList(new MainReactPackage(), new RNCameraPackage(), new SafeAreaContextPackage(),
+      return Arrays.<ReactPackage>asList(new MainReactPackage(),
+            new KCKeepAwakePackage(), new RNCameraPackage(), new SafeAreaContextPackage(),
           new RNCMaskedViewPackage(), new CameraRollPackage(), new ImageEditorPackage(), new AsyncStoragePackage(),
           new RNScreensPackage(), new CompassHeadingPackage(), new ReactNativeOneSignalPackage(),
           new GeolocationPackage(), new RNCWebViewPackage(), new RNFusedLocationPackage(), new RCTMGLPackage(),

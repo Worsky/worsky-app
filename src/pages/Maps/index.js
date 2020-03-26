@@ -9,9 +9,10 @@ import {
 } from "react-native";
 import Icon from "react-native-vector-icons/FontAwesome";
 import MapboxGL from "@react-native-mapbox-gl/maps";
-import Geolocation from "@react-native-community/geolocation";
+// import Geolocation from "@react-native-community/geolocation";
 import CompassHeading from "react-native-compass-heading";
 import Autocomplete from "react-native-autocomplete-input";
+import KeepAwake from "react-native-keep-awake";
 
 import AutocompleteItem from "~/components/AutocompleteItem";
 import CustomModal from "~/components/CustomModal";
@@ -290,6 +291,7 @@ export default function Maps({ navigation }) {
 
   return (
     <View style={{ flex: 1 }}>
+      <KeepAwake />
       <MapboxGL.MapView
         style={{ flex: 1 }}
         styleURL={MapboxGL.StyleURL.Light}
@@ -308,7 +310,7 @@ export default function Maps({ navigation }) {
           ]}
           zoomLevel={15}
           ref={refCamera}
-          heading={heading}
+          // heading={heading}
         />
 
         <MapMarker
