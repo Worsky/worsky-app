@@ -21,7 +21,7 @@ import MapMarker from "~/components/MapMarker";
 import MoreInfoModalContent from "~/components/MoreInfoModalContent";
 
 import { plane } from "~/assets";
-import { metrics } from "~/styles";
+import { metrics, colors } from "~/styles";
 
 import {
   dispatchAndVerifyPermissions,
@@ -52,6 +52,13 @@ export default function Maps({ navigation }) {
 
   const refCamera = useRef(null);
   const refMapView = useRef(null);
+
+  navigation.addListener("didFocus", () => {
+    Platform.OS != "ios"
+      ? StatusBar.setBackgroundColor(colors.worSky.white)
+      : null;
+    StatusBar.setBarStyle("dark-content");
+  });
 
   const handleSearch = async data => {
     setSearch(data);
@@ -91,28 +98,30 @@ export default function Maps({ navigation }) {
         latitude: coords.latitude,
         longitute: coords.longitude
       });
+
+      refCamera.current.flyTo(coords.longitude, coords.latitude);
     }
   };
 
-  const onRegionDidChanges = async () => {
-    const [_longitude, _latitude] = await refMapView.current.getCenter();
+  // const onRegionDidChanges = async () => {
+  //   const [_longitude, _latitude] = await refMapView.current.getCenter();
 
-    Geolocation.getCurrentPosition(async ({ coords }) => {
-      const { longitude, latitude } = coords;
+  //   Geolocation.getCurrentPosition(async ({ coords }) => {
+  //     const { longitude, latitude } = coords;
 
-      const mapViewCenter = { _longitude, _latitude };
-      const userCurrentPosition = { longitude, latitude };
+  //     const mapViewCenter = { _longitude, _latitude };
+  //     const userCurrentPosition = { longitude, latitude };
 
-      const shouldFollowUpdate = errorMarginToDisplayTargetIcon(
-        mapViewCenter,
-        userCurrentPosition
-      );
+  //     const shouldFollowUpdate = errorMarginToDisplayTargetIcon(
+  //       mapViewCenter,
+  //       userCurrentPosition
+  //     );
 
-      if (!shouldFollowUpdate) await setFollow(shouldFollowUpdate);
-    });
+  //     if (!shouldFollowUpdate) await setFollow(shouldFollowUpdate);
+  //   });
 
-    if (!follow) handleMapPan();
-  };
+  //   if (!follow) handleMapPan();
+  // };
 
   const toggleFilter = (id, value) => {
     let newFilters = JSON.parse(JSON.stringify(filters));
@@ -288,7 +297,7 @@ export default function Maps({ navigation }) {
         attributionEnabled={false}
         ref={refMapView}
         onPress={cleanSearchAndCenterMap}
-        onRegionDidChange={onRegionDidChanges}
+        // onRegionDidChange={onRegionDidChanges}
       >
         <MapboxGL.Camera
           followUserLocation={follow}
@@ -313,14 +322,14 @@ export default function Maps({ navigation }) {
 
       <Image source={plane} style={styles.planeOnMap} height={64} width={64} />
 
-      {!follow && (
-        <TouchableOpacity
-          style={styles.myPositionButton}
-          onPress={centerMapOnMe}
-        >
-          <Icon name="crosshairs" size={22} color={"black"} />
-        </TouchableOpacity>
-      )}
+      <TouchableOpacity
+        style={styles.myPositionButton}
+        onPress={() => {
+          follow ? setFollow(false) : centerMapOnMe();
+        }}
+      >
+        <Icon name="crosshairs" size={22} color={follow ? "grey" : "black"} />
+      </TouchableOpacity>
 
       <View style={styles.instruments}>
         <MapTool text={`${speed.toFixed(1)} kt`} />
