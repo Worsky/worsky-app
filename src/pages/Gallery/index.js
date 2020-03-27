@@ -15,7 +15,8 @@ export default class Gallery extends Component {
   state = {
     current: {},
     groupTypes: "All",
-    paused: false
+    paused: false,
+    loading: false
   };
   mediaContainer = () => {
     const {
@@ -85,17 +86,20 @@ export default class Gallery extends Component {
       const { current } = this.state;
       const { navigation } = this.props;
 
+      this.handleLoading();
+
       const mediaType = current.type === "video/mp4" ? "video" : "photo";
 
       let response = current.type === "video/mp4" ? current : await this.handleCrop();
 
       response = { ...current, uri: current.type === "video/mp4" ? current.uri : response };
 
-      console.log(response);
-
       navigation.navigate('PublishPreview', { response, mediaType });
+
+      this.handleLoading();
     } catch (error) {
-      console.log(error)
+      this.handleLoading();
+      // console.log(error)
     }
   }
 
@@ -105,14 +109,21 @@ export default class Gallery extends Component {
     navigation.navigate('Feed');
   }
 
+  componentWillMount() {
+    this.setState({ loading: false })
+  }
+
+  handleLoading = () => this.setState({ loading: !this.state.loading })
+
   render() {
-    const { paused } = this.state;
+    const { paused, loading } = this.state;
 
     return (
       <ScrollView style={styles.container} ref="_scrollView">
         <CameraRollHeader
           handleFunction={this.handleFunction.bind(this)}
           handleBack={this.handleBack.bind(this)}
+          loading={loading}
         />
         <View style={styles.imagePreviewContainer}>
           {paused ? (

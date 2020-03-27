@@ -60,7 +60,7 @@ export default function PublishPreview({ navigation }) {
               source={{ uri: params.response.uri }}
               resizeMode="cover"
               repeat={true}
-              paused={!paused}
+              paused={paused}
               style={styles.video}
             />
           </TouchableWithoutFeedback>

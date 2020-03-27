@@ -14,6 +14,9 @@ const styles = StyleSheet.create({
   },
   headerActions: {
     flexDirection: "row"
+  },
+  loading: {
+    marginLeft: 65
   }
 });
 

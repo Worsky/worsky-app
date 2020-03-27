@@ -24,8 +24,7 @@ import { Creators as searchActions } from "~/store/ducks/search";
 
 import CameraRollHeader from "~/components/CameraRollHeader";
 import AutocompleteItem from "~/components/AutocompleteItem";
-import LoadingPage from "../LoadingPage";
-import MapMarker from "~/components/MapMarker";
+// import MapMarker from "~/components/MapMarker";
 
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import IconAw from "react-native-vector-icons/FontAwesome5";
@@ -39,7 +38,7 @@ import api from "../../pages/Maps/api";
 import { dispatchAndVerifyPermissions } from "../../pages/Maps/helpers";
 
 MapboxGL.setAccessToken(
-  "sk.eyJ1Ijoiam9lbGJhbnphdHRvIiwiYSI6ImNrNDk2cmkzNzAwdHkzZHMyY2x2ZGh0eXYifQ.EeAfcaGLuGKv0FV90GT27g"
+  "pk.eyJ1Ijoid29yc2t5IiwiYSI6ImNrN3dwb2xvMjA0ZDQza3FncDhnY3BocnkifQ.3s1eTwHlWIbhWjDiTfp2wQ"
 );
 
 class Publish extends Component {
@@ -315,7 +314,7 @@ class Publish extends Component {
 
   render() {
     const { follow, description, search, hideResults, location } = this.state
-    const { navigation, reportTypes, searchResult } = this.props;
+    const { navigation, reportTypes, searchResult, loading } = this.props;
     const { state: { params } } = navigation;
 
     let result = [];
@@ -328,9 +327,11 @@ class Publish extends Component {
         <CameraRollHeader
           title="Publish"
           next="Finish"
+          loading={loading}
           handleFunction={() => this.handleCorfirm()}
           handleBack={() => this.handleBack()}
         />
+
         <View style={styles.inputsContainer}>
           <View style={styles.inputView}>
             {params && <Image source={{ uri: params.response.uri }} style={styles.imagePreviewContainer} />}
@@ -432,37 +433,8 @@ class Publish extends Component {
                 ref={cam => this.state.mapCamera = cam}
               />
 
-              {/* <MapboxGL.UserLocation onUpdate={(coords) => this.handleCenterPosition(coords)} /> */}
+              <MapboxGL.UserLocation />
             </MapboxGL.MapView>
-
-            {/* <MapboxGL.MapView
-              style={{ flex: 1 }}
-              styleURL={MapboxGL.StyleURL.Light}
-              logoEnabled={false}
-              attributionEnabled={false}
-              // ref={refMapView}
-              ref={view => this.state.mapView = view}
-              // onPress={cleanSearchAndCenterMap}
-              onPress={(point) => this.cleanSearchAndCenterMap(point)}
-              // onRegionDidChange={onRegionDidChanges}
-              onRegionDidChange={() => this.handleCenterPosition()}
-            >
-              <MapboxGL.Camera
-                followUserLocation={follow}
-                // followUserMode={MapboxGL.UserTrackingModes.FollowWithHeading}
-                followUserMode={follow ? "course" : "normal"}
-                centerCoordinate={[
-                  location.longitude,
-                  location.latitude
-                ]}
-                zoomLevel={15}
-                // ref={refCamera}
-                ref={cam => this.state.mapCamera = cam}
-              // heading={heading}
-              />
-
-              <MapboxGL.UserLocation onUpdate={(coords) => this.handleCenterPosition(coords)} />
-            </MapboxGL.MapView> */}
 
             <Image source={pinmap} style={styles.planeOnMap} height={64} width={64} />
           </View>
