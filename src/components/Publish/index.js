@@ -67,40 +67,14 @@ class Publish extends Component {
     infoModalVisible: false,
     mapLoaded: false,
     filters: { all: true },
-    posts: [],
-    userId: 1,
   };
 
-  handleMapPan = async () => {
+  handleCenterPosition = ({ coordinates }) => {
     try {
-      const { mapLoaded, mapView, filters } = this.state;
+      const [longitude, latitude] = coordinates;
 
-      if (!mapLoaded) return;
-
-      const [[lng1, lat1], [lng2, lat2]] = await mapView.getVisibleBounds();
-      const zoom = await mapView.getZoom();
-
-      let pointIds = Object.keys(filters)
-        .filter(k => k !== "all" && filters[k] === true)
-        .map(key => key.replace("point", ""))
-        .join(",");
-
-      if (filters.all === true)
-        pointIds = Object.keys(filters)
-          .filter(k => k !== "all")
-          .map(key => key.replace("point", ""))
-          .join(",");
-
-      const apiResponse = await api.loadPosts(
-        lat1,
-        lng1,
-        lat2,
-        lng2,
-        zoom,
-        pointIds
-      );
-
-      this.setState({ posts: apiResponse.data.data })
+      if (longitude, latitude)
+        this.setState({ location: { longitude, latitude } })
     } catch (error) {
       return error;
     }
@@ -128,7 +102,6 @@ class Publish extends Component {
     const {
       description,
       entity_id,
-      userId,
       location,
     } = this.state;
 
@@ -138,11 +111,10 @@ class Publish extends Component {
       description,
       uri,
       entity_id,
-      userId
     );
 
-    // if (faliure)
-    //   this.cleanState()
+    if (!faliure)
+      this.cleanState()
 
   };
 
@@ -314,14 +286,6 @@ class Publish extends Component {
     })
   };
 
-  handleCenterPosition = ({ coords }) => {
-    if (this.state.follow) {
-      this.setState({
-        location: { latitude: coords.latitude, longitude: coords.longitude }
-      })
-    }
-  };
-
   async componentWillMount() {
     const { navigation } = this.props;
     const { state: { params } } = navigation;
@@ -453,7 +417,8 @@ class Publish extends Component {
               logoEnabled={false}
               onDidFinishLoadingMap={() => this.setState({ mapLoaded: true })}
               onPress={(point) => this.cleanSearchAndCenterMap(point)}
-              onRegionDidChange={() => this.handleMapPan()}
+              // onRegionDidChange={() => this.handleCenterPosition()}
+              onRegionDidChange={({ geometry }) => this.handleCenterPosition(geometry)}
               centerCoordinate={[
                 location.longitude,
                 location.latitude
@@ -467,7 +432,7 @@ class Publish extends Component {
                 ref={cam => this.state.mapCamera = cam}
               />
 
-              <MapboxGL.UserLocation onUpdate={(coords) => this.handleCenterPosition(coords)} />
+              {/* <MapboxGL.UserLocation onUpdate={(coords) => this.handleCenterPosition(coords)} /> */}
             </MapboxGL.MapView>
 
             {/* <MapboxGL.MapView
@@ -480,7 +445,7 @@ class Publish extends Component {
               // onPress={cleanSearchAndCenterMap}
               onPress={(point) => this.cleanSearchAndCenterMap(point)}
               // onRegionDidChange={onRegionDidChanges}
-              onRegionDidChange={() => this.handleMapPan()}
+              onRegionDidChange={() => this.handleCenterPosition()}
             >
               <MapboxGL.Camera
                 followUserLocation={follow}
