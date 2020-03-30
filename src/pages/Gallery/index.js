@@ -3,7 +3,6 @@ import { View, TouchableWithoutFeedback, ScrollView, Dimensions } from "react-na
 import Video from "react-native-video";
 import Icon from "react-native-vector-icons/FontAwesome";
 import ImageEditor from "@react-native-community/image-editor";
-// import ImagePicker from 'react-native-image-crop-picker';
 
 import ViewZoom from "../../components/ViewZoom";
 import CameraRollList from "../../components/CameraRollList";
@@ -61,23 +60,14 @@ export default class Gallery extends Component {
       const offset = this.viewZoom.getOffset();
 
       const cropData = {
-        offset,
+        offset: { x: 0, y: 0 },
         size: { width: current.width, height: current.height }
       };
 
-      console.log({ cropData })
+      return await ImageEditor.cropImage(current.uri, cropData);
 
-      const response = await ImageEditor.cropImage(current.uri, cropData);
-      // const response = await ImagePicker.openPicker({
-      //   width: 300,
-      //   height: 400,
-      //   cropping: true
-      // })
-
-
-      return response;
     } catch (error) {
-      console.log(error)
+      // console.log(error)
     }
   };
 
@@ -86,7 +76,7 @@ export default class Gallery extends Component {
       const { current } = this.state;
       const { navigation } = this.props;
 
-      this.handleLoading();
+      this.setState({ loading: true })
 
       const mediaType = current.type === "video/mp4" ? "video" : "photo";
 
@@ -94,9 +84,9 @@ export default class Gallery extends Component {
 
       response = { ...current, uri: current.type === "video/mp4" ? current.uri : response };
 
-      navigation.navigate('PublishPreview', { response, mediaType });
+      this.setState({ loading: false })
 
-      this.handleLoading();
+      navigation.navigate('PublishPreview', { response, mediaType });
     } catch (error) {
       this.handleLoading();
       // console.log(error)
@@ -109,7 +99,11 @@ export default class Gallery extends Component {
     navigation.navigate('Feed');
   }
 
-  componentWillMount() {
+  componentDidMount() {
+    this.setState({ loading: false })
+  }
+
+  componentWillUnmount() {
     this.setState({ loading: false })
   }
 

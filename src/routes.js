@@ -150,9 +150,9 @@ const feedTabNavigator = createBottomTabNavigator(
         }
       },
     },
-    Publish: {
-      screen: Publish
-    }
+    // Publish: {
+    //   screen: Publish
+    // }
   },
   {
     initialRouteName: 'Photo',

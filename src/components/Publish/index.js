@@ -200,7 +200,9 @@ class Publish extends Component {
 
   handleUserPosition = async () => {
     try {
-      Geolocation.watchPosition(
+      await dispatchAndVerifyPermissions();
+
+      Geolocation.getCurrentPosition(
         position => this.setState({
           userPosition: position.coords,
           location: { latitude: position.coords.latitude, longitude: position.coords.longitude }
@@ -212,6 +214,7 @@ class Publish extends Component {
       );
 
       const { data: response } = await api.loadCategories();
+
       this.setState({ categories: response.data });
 
       if (CompassHeading)
@@ -299,7 +302,6 @@ class Publish extends Component {
 
     const { loadReportTypes } = this.props;
 
-    await dispatchAndVerifyPermissions();
 
     await loadReportTypes();
   }
@@ -310,6 +312,10 @@ class Publish extends Component {
 
   componentWillUnmount() {
     this.cleanState();
+  }
+
+  async componentWillMount() {
+    await dispatchAndVerifyPermissions()
   }
 
   render() {
@@ -436,7 +442,7 @@ class Publish extends Component {
               <MapboxGL.UserLocation />
             </MapboxGL.MapView>
 
-            <Image source={pinmap} style={styles.planeOnMap} height={64} width={64} />
+            <Image source={pinmap} style={styles.planeOnMap} height={32} width={32} />
           </View>
         </View>
       </View >
