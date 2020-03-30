@@ -28,6 +28,8 @@ export default function PublishPreview({ navigation }) {
 
     await handleMediaUrl(params.response, params.mediaType);
 
+    console.log(faliure);
+
 
     if (!faliure)
       navigation.navigate('Publish', { response: params.response, mediaType: params.mediaType });

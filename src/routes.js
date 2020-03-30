@@ -90,7 +90,8 @@ const feedTabNavigator = createBottomTabNavigator(
       screen: createStackNavigator(
         {
           Photo,
-          PublishPreview
+          PublishPreview,
+          Publish
         },
         {
           defaultNavigationOptions: {
@@ -122,7 +123,8 @@ const feedTabNavigator = createBottomTabNavigator(
       screen: createStackNavigator(
         {
           Video,
-          PublishPreview
+          PublishPreview,
+          Publish
         },
         {
           defaultNavigationOptions: {

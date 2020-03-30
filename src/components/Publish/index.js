@@ -299,14 +299,13 @@ class Publish extends Component {
         mediaType: params.mediaType
       })
     }
-
-    const { loadReportTypes } = this.props;
-
-
-    await loadReportTypes();
   }
 
-  componentDidMount() {
+  async componentDidMount() {
+    const { loadReportTypes } = this.props;
+
+    await loadReportTypes();
+
     this.handleUserPosition();
   }
 
