@@ -76,6 +76,7 @@ target 'worSky' do
 
     pod 'react-native-camera', :path => '../node_modules/react-native-camera'
 
+    pod 'react-native-keep-awake', :path => '../node_modules/react-native-keep-awake'
 
   end
 
