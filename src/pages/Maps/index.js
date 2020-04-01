@@ -5,11 +5,12 @@ import {
   View,
   Keyboard,
   Image,
-  TouchableOpacity
+  TouchableOpacity,
+  Alert
 } from "react-native";
 import Icon from "react-native-vector-icons/FontAwesome";
 import MapboxGL from "@react-native-mapbox-gl/maps";
-// import Geolocation from "@react-native-community/geolocation";
+import Geolocation from "@react-native-community/geolocation";
 import CompassHeading from "react-native-compass-heading";
 import Autocomplete from "react-native-autocomplete-input";
 import KeepAwake from "react-native-keep-awake";
@@ -24,10 +25,7 @@ import MoreInfoModalContent from "~/components/MoreInfoModalContent";
 import { plane } from "~/assets";
 import { metrics, colors } from "~/styles";
 
-import {
-  dispatchAndVerifyPermissions,
-  errorMarginToDisplayTargetIcon
-} from "./helpers";
+import { dispatchAndVerifyPermissions } from "./helpers";
 import styles from "./styles";
 import api from "./api";
 
@@ -36,7 +34,6 @@ MapboxGL.setAccessToken(
 );
 
 export default function Maps({ navigation }) {
-  const [currentPosition, setCurrentPosition] = useState({});
   const [speed, setSpeed] = useState(0);
   const [altitude, setAltitude] = useState(0);
   const [heading, setHeading] = useState(0);
@@ -50,6 +47,10 @@ export default function Maps({ navigation }) {
   const [infoPoint, setInfoPoint] = useState({});
   const [infoModalVisible, setInfoModalVisible] = useState(false);
   const [icons, setIcons] = useState([]);
+  const [followMode, setFollowMode] = useState(
+    MapboxGL.UserTrackingModes.Follow
+  );
+  const [targetOn, setTargetOn] = useState(true);
 
   const refCamera = useRef(null);
   const refMapView = useRef(null);
@@ -74,19 +75,12 @@ export default function Maps({ navigation }) {
     setSearchResult(response.data);
   };
 
-  const centerMapOnMe = async () => {
-    try {
-      if (follow) setFollow(false);
+  const centerMapOnMe = () => {
+    Geolocation.getCurrentPosition(({ coords }) => {
+      refCamera.current.moveTo([coords.longitude, coords.latitude], 1200);
+    });
 
-      await refCamera.current.moveTo(
-        [userPosition.longitude, userPosition.latitude],
-        1200
-      );
-
-      setFollow(true);
-    } catch (error) {
-      setFollow(true);
-    }
+    setTargetOn(true);
   };
 
   const handleCenterPosition = ({ coords }) => {
@@ -94,35 +88,9 @@ export default function Maps({ navigation }) {
 
     setSpeed(coords.speed);
 
-    if (follow) {
-      setCurrentPosition({
-        latitude: coords.latitude,
-        longitute: coords.longitude
-      });
-
-      refCamera.current.flyTo(coords.longitude, coords.latitude);
-    }
+    if (targetOn)
+      refCamera.current.flyTo([coords.longitude, coords.latitude], 200);
   };
-
-  // const onRegionDidChanges = async () => {
-  //   const [_longitude, _latitude] = await refMapView.current.getCenter();
-
-  //   Geolocation.getCurrentPosition(async ({ coords }) => {
-  //     const { longitude, latitude } = coords;
-
-  //     const mapViewCenter = { _longitude, _latitude };
-  //     const userCurrentPosition = { longitude, latitude };
-
-  //     const shouldFollowUpdate = errorMarginToDisplayTargetIcon(
-  //       mapViewCenter,
-  //       userCurrentPosition
-  //     );
-
-  //     if (!shouldFollowUpdate) await setFollow(shouldFollowUpdate);
-  //   });
-
-  //   if (!follow) handleMapPan();
-  // };
 
   const toggleFilter = (id, value) => {
     let newFilters = JSON.parse(JSON.stringify(filters));
@@ -233,6 +201,8 @@ export default function Maps({ navigation }) {
 
     setSearchResult([]);
 
+    if (targetOn) setTargetOn(false);
+
     Keyboard.dismiss();
 
     mapCenterOnPoint(point);
@@ -299,18 +269,14 @@ export default function Maps({ navigation }) {
         attributionEnabled={false}
         ref={refMapView}
         onPress={cleanSearchAndCenterMap}
-        // onRegionDidChange={onRegionDidChanges}
+        onRegionDidChange={handleMapPan}
+        onDidFinishLoadingMap={() => setFollow(false)}
       >
         <MapboxGL.Camera
           followUserLocation={follow}
-          followUserMode={MapboxGL.UserTrackingModes.FollowWithHeading}
-          centerCoordinate={[
-            currentPosition.longitute,
-            currentPosition.latitude
-          ]}
+          followUserMode={followMode}
           zoomLevel={15}
           ref={refCamera}
-          // heading={heading}
         />
 
         <MapMarker
@@ -327,18 +293,36 @@ export default function Maps({ navigation }) {
       <TouchableOpacity
         style={styles.myPositionButton}
         onPress={() => {
-          follow ? setFollow(false) : centerMapOnMe();
+          targetOn ? setTargetOn(false) : centerMapOnMe();
         }}
       >
-        <Icon name="crosshairs" size={22} color={follow ? "grey" : "black"} />
+        <Icon name="crosshairs" size={22} color={targetOn ? "grey" : "black"} />
       </TouchableOpacity>
 
       <View style={styles.instruments}>
-        <MapTool text={`${speed.toFixed(1)} kt`} />
+        <MapTool
+          text={`${Math.round(speed)} kt`}
+          onPress={() => {
+            Alert.alert("NORMAL follow mode on");
+            setFollowMode(MapboxGL.UserTrackingModes.Follow);
+          }}
+        />
 
-        <MapTool text={`${Math.round(heading || 0)}º`} />
+        <MapTool
+          text={`${Math.round(heading || 0)}º`}
+          onPress={() => {
+            Alert.alert("COURSE follow mode on");
+            setFollowMode(MapboxGL.UserTrackingModes.FollowWithCourse);
+          }}
+        />
 
-        <MapTool text={`${Math.round(altitude * 3.2808)} ft`} />
+        <MapTool
+          text={`${Math.round(altitude * 3.2808)} ft`}
+          onPress={() => {
+            Alert.alert("HEADING follow mode on");
+            setFollowMode(MapboxGL.UserTrackingModes.FollowWithHeading);
+          }}
+        />
       </View>
 
       <View style={styles.searchContainer}>
@@ -349,7 +333,7 @@ export default function Maps({ navigation }) {
           value={search}
           style={styles.autocomplete}
           placeholder="Search by location"
-          onFocus={() => setFollow(false)}
+          onFocus={() => setTargetOn(false)}
           renderItem={({ item }) => (
             <AutocompleteItem
               item={item}
