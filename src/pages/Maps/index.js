@@ -277,6 +277,7 @@ export default function Maps({ navigation }) {
           followUserMode={followMode}
           zoomLevel={15}
           ref={refCamera}
+          heading={targetOn ? heading : 0}
         />
 
         <MapMarker
