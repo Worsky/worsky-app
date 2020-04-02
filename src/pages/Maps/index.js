@@ -48,7 +48,7 @@ export default function Maps({ navigation }) {
   const [infoModalVisible, setInfoModalVisible] = useState(false);
   const [icons, setIcons] = useState([]);
   const [followMode, setFollowMode] = useState(
-    MapboxGL.UserTrackingModes.Follow
+    MapboxGL.UserTrackingModes.FollowWithCourse
   );
   const [targetOn, setTargetOn] = useState(true);
 
@@ -75,21 +75,21 @@ export default function Maps({ navigation }) {
     setSearchResult(response.data);
   };
 
-  const centerMapOnMe = () => {
-    Geolocation.getCurrentPosition(({ coords }) => {
-      refCamera.current.moveTo([coords.longitude, coords.latitude], 1200);
-    });
+  // const centerMapOnMe = () => {
+  //   Geolocation.getCurrentPosition(({ coords }) => {
+  //     refCamera.current.moveTo([coords.longitude, coords.latitude], 1200);
+  //   });
 
-    setTargetOn(true);
-  };
+  //   setTargetOn(true);
+  // };
 
   const handleCenterPosition = ({ coords }) => {
     setAltitude(coords.altitude);
 
     setSpeed(coords.speed);
 
-    if (targetOn)
-      refCamera.current.flyTo([coords.longitude, coords.latitude], 200);
+    // if (targetOn)
+    //   refCamera.current.flyTo([coords.longitude, coords.latitude], 200);
   };
 
   const toggleFilter = (id, value) => {
@@ -201,7 +201,7 @@ export default function Maps({ navigation }) {
 
     setSearchResult([]);
 
-    if (targetOn) setTargetOn(false);
+    if (targetOn) setFollow(false);
 
     Keyboard.dismiss();
 
@@ -248,16 +248,35 @@ export default function Maps({ navigation }) {
   };
 
   useEffect(() => {
-    CompassHeading.start(3, degree => {
-      setHeading(degree);
-    });
-
     handleInitialDatas();
   }, []);
 
   useEffect(() => {
     handleMapPan();
   }, [filters]);
+
+  useEffect(() => {
+    const id = Geolocation.watchPosition(
+      ({ coords }) => {
+        if (!follow) return false;
+
+        setHeading(coords.heading);
+        refCamera.current.setCamera({
+          centerCoordinate: [coords.longitude, coords.latitude]
+        });
+      },
+      error => {
+        Alert.alert(JSON.stringify(error));
+      },
+      {
+        enableHighAccuracy: true,
+        distanceFilter: 10,
+        maximumAge: 0,
+        timeout: 2000
+      }
+    );
+    if (!follow) Geolocation.clearWatch(id);
+  }, [follow, refCamera]);
 
   return (
     <View style={{ flex: 1 }}>
@@ -270,14 +289,13 @@ export default function Maps({ navigation }) {
         ref={refMapView}
         onPress={cleanSearchAndCenterMap}
         onRegionDidChange={handleMapPan}
-        onDidFinishLoadingMap={() => setFollow(false)}
       >
         <MapboxGL.Camera
           followUserLocation={follow}
           followUserMode={followMode}
           zoomLevel={15}
           ref={refCamera}
-          heading={targetOn ? heading : 0}
+          heading={heading}
         />
 
         <MapMarker
@@ -294,10 +312,10 @@ export default function Maps({ navigation }) {
       <TouchableOpacity
         style={styles.myPositionButton}
         onPress={() => {
-          targetOn ? setTargetOn(false) : centerMapOnMe();
+          setFollow(!follow);
         }}
       >
-        <Icon name="crosshairs" size={22} color={targetOn ? "grey" : "black"} />
+        <Icon name="crosshairs" size={22} color={follow ? "grey" : "black"} />
       </TouchableOpacity>
 
       <View style={styles.instruments}>
@@ -334,7 +352,7 @@ export default function Maps({ navigation }) {
           value={search}
           style={styles.autocomplete}
           placeholder="Search by location"
-          onFocus={() => setTargetOn(false)}
+          onFocus={() => setFollow(false)}
           renderItem={({ item }) => (
             <AutocompleteItem
               item={item}
@@ -374,7 +392,6 @@ export default function Maps({ navigation }) {
           close={true}
         />
       </View>
-      {/* {infoPoint && ( */}
       <CustomModal
         close={false}
         visible={infoModalVisible}
@@ -387,7 +404,6 @@ export default function Maps({ navigation }) {
           />
         }
       />
-      {/* )} */}
     </View>
   );
 }
