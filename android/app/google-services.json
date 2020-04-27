@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "855956176929",
+    "firebase_url": "https://worsky-c15fc.firebaseio.com",
+    "project_id": "worsky-c15fc",
+    "storage_bucket": "worsky-c15fc.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:855956176929:android:f6367754b1a704905b2360",
+        "android_client_info": {
+          "package_name": "com.pilotobrasil"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "855956176929-gro5adsgrd478tcpb109pl8jo8tmhtvg.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDhnLQqls8vwV8KtrJ9YdtKgi1NNHPXoWM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "855956176929-gro5adsgrd478tcpb109pl8jo8tmhtvg.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
